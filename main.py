@@ -8,7 +8,8 @@ from dotenv import load_dotenv
 
 import random
 
-#Get the OpenAI API key from the .env file
+#Get the OpenAI API key from the .env file (secret not commited)
+###
 load_dotenv('.env', override=True)
 def main(cv_file_path, job_description_text):
     # Load API key securely
@@ -66,7 +67,7 @@ def main(cv_file_path, job_description_text):
 
     # Create a PDF of the final cover letter
     output_pdf_path = "Output/cover_letter.pdf"
-    create_pdf(output_pdf_path, "Cover Letter", applicant_name, cover_letter)
+    create_pdf(output_pdf_path, applicant_name, cover_letter)
     print(f"Cover letter saved to {output_pdf_path}")
 
 if __name__ == "__main__":
