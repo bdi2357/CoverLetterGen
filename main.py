@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 import random
 
 #Get the OpenAI API key from the .env file (secret not commited)
-###
+#####
 load_dotenv('.env', override=True)
 def main(cv_file_path, job_description_text):
     # Load API key securely
