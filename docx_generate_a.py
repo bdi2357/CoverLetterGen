@@ -7,6 +7,11 @@ from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.oxml.ns import qn
 from docx.oxml import OxmlElement
 from data_handling import load_and_extract_text
+from docx.shared import Pt
+from docx.enum.text import WD_ALIGN_PARAGRAPH
+from cv_info_extractor import extract_information_from_cv, get_llm_response, parse_extracted_info
+
+
 # Load OpenAI API key from .env file
 load_dotenv('.env', override=True)
 openai_api_key = os.getenv('OPENAI_API_KEY')
@@ -71,16 +76,87 @@ def clean_extracted_text(extracted_text):
     return cleaned_text
 
 
+def extract_information_from_cv(cv_text):
+    """
+    Extracts applicant's name, email, phone, address, GitHub, and LinkedIn from the provided CV text.
+
+    Args:
+        cv_text (str): The full text of the CV.
+
+    Returns:
+        dict: A dictionary containing the extracted information.
+    """
+    prompt = f"""
+    Extract the following information from the given CV text:
+    - Full name of the applicant
+    - Email address
+    - Phone number
+    - Physical address
+    - GitHub profile (if present)
+    - LinkedIn profile (if present)
+
+    If any of the information is missing, simply omit it from the result. Provide the output in a structured format.
+
+    Here is the CV text:
+    \"{cv_text}\"
+    """
+
+    response = get_llm_response(prompt)
+
+    if response:
+        # Parse the response into a dictionary (assume that the GPT response is structured)
+        extracted_info = parse_extracted_info(response)
+        return extracted_info
+    else:
+        return {}
+
+
+def parse_extracted_info(response):
+    """
+    Parses the structured response from GPT into a dictionary for easy access to the fields.
+
+    Args:
+        response (str): The text response from GPT.
+
+    Returns:
+        dict: A dictionary containing the extracted information.
+    """
+    # Initialize an empty dictionary to hold the extracted information
+    info_dict = {}
+
+    # Split the response by lines
+    lines = response.split("\n")
+
+    # Loop through lines and parse key-value pairs (Name, Email, etc.)
+    for line in lines:
+        if line.strip():  # Skip empty lines
+            key_value = line.split(":")
+            if len(key_value) == 2:
+                key, value = key_value[0].strip(), key_value[1].strip()
+                info_dict[key] = value
+
+    return info_dict
+
+
 def create_cv_doc(original_cv, job_description, file_name):
     """
-    Adapts a CV based on a job description using GPT-4 and saves it as a DOCX file
-    with professional formatting.
+    Adapts a CV based on a job description using GPT-4 and saves it as a DOCX file with professional formatting.
 
     Parameters:
     - original_cv (str): The original CV content.
     - job_description (str): The job description to adapt the CV to.
     - file_name (str): Name of the DOCX file to be saved.
     """
+    # Extract personal information using parse_extracted_info
+    personal_info = extract_information_from_cv(original_cv)
+
+    name = personal_info.get("Name", "Name Not Found")
+    address = personal_info.get("Address", "Address Not Found")
+    phone = personal_info.get("Phone", "Phone Not Found")
+    email = personal_info.get("Email", "Email Not Found")
+    linkedin = personal_info.get("LinkedIn", "")
+    github = personal_info.get("GitHub", "")
+
     prompt = f"""
     Given the following original CV and job description, adapt the CV to align with the job requirements:
 
@@ -99,15 +175,22 @@ def create_cv_doc(original_cv, job_description, file_name):
     # Create a DOCX file
     doc = Document()
 
-    # Add proper contact info formatting with line breaks and centered alignment
-    title = doc.add_paragraph("Itay Ben-Dan", style="Title")
+    # Add personal info to the document
+    title = doc.add_paragraph(name, style="Title")
     title.alignment = WD_ALIGN_PARAGRAPH.CENTER
 
-    address = doc.add_paragraph("Haarava 20\nHerzliya, Israel 46100", style="Normal")
-    address.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    # Add address, phone, and email
+    contact_paragraph = doc.add_paragraph()
+    contact_paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    contact_paragraph.add_run(f"{address}\n")
+    contact_paragraph.add_run(f"Cellular: {phone}\n")
+    contact_paragraph.add_run(f"Email: {email}\n")
 
-    contact_info = doc.add_paragraph("Cellular: +972544539284\nEmail: itaybd@gmail.com", style="Normal")
-    contact_info.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    # Optionally add LinkedIn and GitHub if they are present
+    if linkedin:
+        contact_paragraph.add_run(f"LinkedIn: {linkedin}\n")
+    if github:
+        contact_paragraph.add_run(f"GitHub: {github}\n")
 
     # Ensure contact info is formatted clearly with proper line breaks
     doc.add_paragraph()
@@ -123,21 +206,17 @@ def create_cv_doc(original_cv, job_description, file_name):
         elif "Skills" in section:
             parts = section.split('\n', 1)
             content = parts[1] if len(parts) > 1 else parts[0]
-            add_formatted_section(doc, 'Key Skills', content, bullet_points=False)  # No bullets
-        elif "Experience" in section:
+            add_formatted_section(doc, 'Key Skills', content,
+                                  bullet_points=True)  # Add bullet points for Skills section
+        elif "Experience" in section or "Work Experience" in section:
             parts = section.split('\n', 1)
             content = parts[1] if len(parts) > 1 else parts[0]
-            add_formatted_section(doc, 'Professional Experience', content, bullet_points=False)  # No bullets
+            add_formatted_section(doc, 'Professional Experience', content,
+                                  bullet_points=True)  # Add bullet points for Experience
         elif "Education" in section:
             parts = section.split('\n', 1)
             content = parts[1] if len(parts) > 1 else parts[0]
-            add_formatted_section(doc, 'Education', content, bullet_points=False)  # No bullets
-
-    # Add a horizontal line to visually separate sections
-    add_horizontal_line(doc)
-
-    # Add page numbers to the footer
-    add_footer(doc)
+            add_formatted_section(doc, 'Education', content, bullet_points=False)  # No bullets for Education
 
     # Save the document
     doc_path = f'{file_name}.docx'
@@ -197,7 +276,7 @@ if __name__ == "__main__":
     NVIDIA SOC Architecture team is looking for a Senior Data Scientist with SW development skills and HW-System architecture experience. In this position, you will develop datasets, AI models and train AI models for advanced system architecture Power and Performance features, and collaborate with HW & System architects. Strong proficiency in Python, C/C++ required.
     """
 
-    out = os.path.join("Output", "Itay_Ben_Dan_CV_Improved_Visual")
+    out = os.path.join("Output", "Itay_Ben_Dan_CV_Improved_Visual_2")
     # Create the CV document with professional formatting and visual improvements
     doc_file_path = create_cv_doc(original_cv, job_description, out)
 
