@@ -19,28 +19,6 @@ openai_api_key = os.getenv('OPENAI_API_KEY')
 # Set up OpenAI client
 client = OpenAI(api_key=openai_api_key)
 
-def get_llm_response(prompt):
-    """
-    Function to get a response from OpenAI GPT model.
-    """
-    try:
-        if not isinstance(prompt, str):
-            raise ValueError("Input must be a string enclosed in quotes.")
-        completion = client.chat.completions.create(
-            model="gpt-4",
-            messages=[
-                {
-                    "role": "system",
-                    "content": "You are a helpful assistant specialized in adapting CVs.",
-                },
-                {"role": "user", "content": prompt},
-            ],
-            temperature=0.0,
-        )
-        response = completion.choices[0].message.content
-        return response
-    except Exception as e:
-        print(f"Error: {str(e)}")
 
 
 def format_header(paragraph, font_size, bold=True, color=(31, 56, 100)):
@@ -76,39 +54,6 @@ def clean_extracted_text(extracted_text):
     return cleaned_text
 
 
-def extract_information_from_cv(cv_text):
-    """
-    Extracts applicant's name, email, phone, address, GitHub, and LinkedIn from the provided CV text.
-
-    Args:
-        cv_text (str): The full text of the CV.
-
-    Returns:
-        dict: A dictionary containing the extracted information.
-    """
-    prompt = f"""
-    Extract the following information from the given CV text:
-    - Full name of the applicant
-    - Email address
-    - Phone number
-    - Physical address
-    - GitHub profile (if present)
-    - LinkedIn profile (if present)
-
-    If any of the information is missing, simply omit it from the result. Provide the output in a structured format.
-
-    Here is the CV text:
-    \"{cv_text}\"
-    """
-
-    response = get_llm_response(prompt)
-
-    if response:
-        # Parse the response into a dictionary (assume that the GPT response is structured)
-        extracted_info = parse_extracted_info(response)
-        return extracted_info
-    else:
-        return {}
 
 
 def parse_extracted_info(response):
