@@ -1,6 +1,6 @@
 import os
 from data_handling import load_and_extract_text, extract_applicant_name
-from ai_interaction import OpenAIModel, CoverLetterGenerator  # Import OpenAIModel or other LLM models
+from ai_interaction import GeminiModel, OpenAIModel, CoverLetterGenerator  # Import OpenAIModel or other LLM models
 from utilities import create_pdf
 from dotenv import load_dotenv
 
@@ -18,6 +18,8 @@ def main(cv_file_path, job_description_text, llm_provider='openai'):
     # Initialize the appropriate AI model based on the llm_provider argument
     if llm_provider == 'openai':
         ai_model = OpenAIModel(api_key=api_key, model_name='gpt-4')  # You can change to gpt-3.5-turbo or another model
+    elif llm_provider == 'gemini' :
+        ai_model = GeminiModel()
     else:
         raise ValueError(f"Unsupported LLM provider: {llm_provider}")
 
@@ -95,4 +97,5 @@ if __name__ == "__main__":
     This individual must be available for 30h/week and during UK working hours.
 
     """
-    main(cv_file_path, job_description_text)
+    # main(cv_file_path, job_description_text)
+    main(cv_file_path, job_description_text,llm_provider="gemini")

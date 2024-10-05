@@ -7,6 +7,14 @@ from abc import ABC, abstractmethod
 import re
 from abc import ABC, abstractmethod
 import logging
+import requests
+
+# Base class for LLM interaction
+import logging
+from abc import ABC, abstractmethod
+import google.generativeai as genai
+from dotenv import load_dotenv
+import os
 
 
 # Base class for LLM interaction
@@ -18,6 +26,53 @@ class LLMModel(ABC):
     @abstractmethod
     def get_response(self, prompt, history=None, temperature=0.7):
         pass
+
+
+# Gemini implementation of LLMModel using google.generativeai
+class GeminiModel(LLMModel):
+    """
+    Class to interact with the Gemini API through google.generativeai.
+    """
+
+    def __init__(self, model_name='gemini-1.5-flash'):
+        """
+        Initialize the Gemini model using google.generativeai.
+
+        Args:
+            model_name (str): The model to use, default is 'gemini-1.5-flash'.
+        """
+        # Load the Google API key from the environment
+        load_dotenv('.env', override=True)
+        google_api_key = os.getenv('GOOGLE_API_KEY')
+        if not google_api_key:
+            raise ValueError("Google API key not found. Please set the 'GOOGLE_API_KEY' environment variable.")
+
+        # Configure the Google generative AI with the API key
+        genai.configure(api_key=google_api_key)
+
+        # Load the Gemini model
+        self.model = genai.GenerativeModel(model_name)
+        self.model_name = model_name
+
+    def get_response(self, prompt, history=None, temperature=0.7):
+        """
+        Get the response from the Gemini model using google.generativeai.
+
+        Args:
+            prompt (str): The prompt to send to the model.
+            history (list): Not currently supported in the google.generativeai, passed for future use.
+            temperature (float): The temperature for response randomness.
+
+        Returns:
+            str: The response from the model.
+        """
+        try:
+            # Use the Google generative AI library to generate content
+            response = self.model.generate_content(prompt)
+            return response.text.strip()  # Returning the generated content text
+        except Exception as e:
+            logging.error(f"An error occurred with the Gemini model: {e}")
+            return None
 
 
 # OpenAI implementation of LLMModel
