@@ -1,32 +1,32 @@
-# main.py
-
 import os
 from data_handling import load_and_extract_text, extract_applicant_name
-from ai_interaction import AIModel, CoverLetterGenerator
+from ai_interaction import OpenAIModel, CoverLetterGenerator  # Import OpenAIModel or other LLM models
 from utilities import create_pdf
 from dotenv import load_dotenv
 
 import random
 
-#Get the OpenAI API key from the .env file (secret not commited)
-#####
+# Get the OpenAI API key from the .env file (secret not committed)
 load_dotenv('.env', override=True)
-def main(cv_file_path, job_description_text):
-    # Load API key securely
-    openai_api_key = os.getenv('OPENAI_API_KEY')
-    if not openai_api_key:
-        raise ValueError("OpenAI API key not found. Please set the 'OPENAI_API_KEY' environment variable.")
 
-    # Initialize AI model and cover letter generator
-    ai_model = AIModel(api_key=openai_api_key, model_name='gpt-4o')
+def main(cv_file_path, job_description_text, llm_provider='openai'):
+    # Load API key securely
+    api_key = os.getenv('OPENAI_API_KEY')
+    if not api_key:
+        raise ValueError("API key not found. Please set the appropriate environment variable.")
+
+    # Initialize the appropriate AI model based on the llm_provider argument
+    if llm_provider == 'openai':
+        ai_model = OpenAIModel(api_key=api_key, model_name='gpt-4')  # You can change to gpt-3.5-turbo or another model
+    else:
+        raise ValueError(f"Unsupported LLM provider: {llm_provider}")
+
+    # Initialize the cover letter generator
     cover_letter_gen = CoverLetterGenerator(ai_model)
 
     # Load CV text
-
     cv_text = load_and_extract_text(cv_file_path)
     applicant_name = extract_applicant_name(cv_text)
-
-
 
     # Initialize conversation history
     history = []
