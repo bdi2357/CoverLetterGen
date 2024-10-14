@@ -36,7 +36,7 @@ CV:
 {cv_text}
 
 Tailor the letter to the specific job requirements and showcase the candidate's match for the position. Mention specific accomplishments and quantify results whenever possible. Keep the tone professional and precise. The letter should be no more than 4 sentences. Avoid unnecessary adjectives and emotive language."""
-        cover_letter = self.cover_letter_gen.generate_cover_letter(prompt, history=self.history)
+        cover_letter = self.cover_letter_gen.generate_cover_letter(cv_text, job_description_text, history=self.history)
         self._add_to_history("user", cover_letter)
         self._add_to_history("assistant", cover_letter)
         return cover_letter
@@ -87,8 +87,8 @@ Tailor the letter to the specific job requirements and showcase the candidate's 
                 break
 
             # Use the same prompt for improvements (constant)
-            cover_letter = self.cover_letter_gen.generate_cover_letter(self.history[-2]["content"],
-                                                                       history=self.history)
+            #cover_letter = self.cover_letter_gen.generate_cover_letter(self.history[-2]["content"],history=self.history)
+            cover_letter = self.cover_letter_gen.generate_cover_letter(cv_text,job_description_text)
 
             # Add improved cover letter to history
             self._add_to_history("user", cover_letter)
