@@ -45,10 +45,11 @@ def main(cv_file_path, job_description_text, llm_provider='openai', method='basi
     print(cover_letter)
 
     # Improve the cover letter
-    improved_cover_letter = agent.improve_cover_letter(cv_text, cover_letter, job_description_text)
+    improved_cover_letter,last_critique = agent.improve_cover_letter(cv_text, cover_letter, job_description_text)
     print("Final Cover Letter:")
     print(improved_cover_letter)
-
+    print("Critique of the Final Cover Letter")
+    print(last_critique)
     # Create a PDF of the final cover letter
     output_pdf_path = "Output/cover_letter.pdf"
     create_pdf(output_pdf_path, applicant_name, improved_cover_letter)

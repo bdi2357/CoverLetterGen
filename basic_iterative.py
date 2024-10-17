@@ -96,4 +96,4 @@ Tailor the letter to the specific job requirements and showcase the candidate's 
 
             previous_grade = grade
 
-        return cover_letter
+        return cover_letter,critique
