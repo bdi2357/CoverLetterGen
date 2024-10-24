@@ -1,5 +1,4 @@
-import os
-
+import os,re
 # Assume the required imports from the respective modules (like OpenAIModel, GeminiModel, etc.)
 from cv_info_extractor import load_and_extract_text
 from ai_interaction import OpenAIModel, GeminiModel
@@ -74,9 +73,15 @@ class ContentEvaluator:
         Job Description:
         {job_description}
 
-        Please provide an overall score out of 10 and specific suggestions for improving the evaluation.
+        Provide  specific suggestions for improving the evaluation and an overall grade on a scale of 1-10 at the end in the format: **#Overall Grade : NUMBER#** 
         """
-        return self.ai_model.get_response(prompt, history=history)
+        response = self.ai_model.get_response(prompt, history=history)
+        match = re.search(r"#Overall Grade\s*:\s*(\d+(\.\d+)?)\s*/?\d*\s*#", response)
+        if match:
+            grade = float(match.group(1))
+        else:
+            raise ValueError("Failed to extract overall grade from the critique.")
+        return response, grade
 
 
 def main(cv_file_path, job_description_text, llm_provider='openai'):
