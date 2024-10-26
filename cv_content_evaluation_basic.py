@@ -54,6 +54,7 @@ class ContentEvaluator:
         {cv_text}
 
         Provide feedback on the candidate’s overall fit for the job, and suggest areas of improvement.
+        Provide an overall grade on a scale of 1-10 at the end in the format: **#Overall Grade : NUMBER#**
         """
         return self.ai_model.get_response(prompt, history=history)
 
@@ -119,9 +120,7 @@ def main(cv_file_path, job_description_text, llm_provider='openai'):
     # Loop to improve CV evaluation based on critique
     max_iterations = 3
     for iteration in range(max_iterations):
-        aa = content_evaluator.create_critique(cv_evaluation, cv_text, job_description_text, history=history)
-        print(len(aa))
-        print(aa)
+
         critique, grade = content_evaluator.create_critique(cv_evaluation, cv_text, job_description_text, history=history)
         print(f"Iteration {iteration+1}, Grade: {grade}")
 
@@ -143,6 +142,12 @@ def main(cv_file_path, job_description_text, llm_provider='openai'):
     # Output the final CV evaluation
     print("Final CV Evaluation:")
     print(cv_evaluation)
+    match = re.search(r"#Overall Grade\s*:\s*(\d+(\.\d+)?)\s*/?\d*\s*#", cv_evaluation)
+    if match:
+        grade = float(match.group(1))
+    else:
+        raise ValueError("Failed to extract overall grade from the critique.")
+    print("Final Grade is: %0.2f"%grade)
 
 
 if __name__ == "__main__":

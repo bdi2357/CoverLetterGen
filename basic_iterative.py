@@ -67,33 +67,61 @@ Tailor the letter to the specific job requirements and showcase the candidate's 
         previous_grade = 0
 
         for iteration in range(self.max_iterations):
-            critique, grade = self.cover_letter_gen.create_critique(cover_letter, cv_text, job_description_text,
-                                                                    history=self.history)
+            # Get critique and grade the current cover letter
+            critique, grade = self.cover_letter_gen.create_critique(
+                cover_letter, cv_text, job_description_text, history=self.history
+            )
             total_reward += grade
             self.grades.append(grade)
             print(f"Iteration {iteration + 1}, Grade: {grade}, Cumulative Reward: {total_reward}")
 
-            # Add critique to history
-            self._add_to_history("user", critique)
+            # Add critique to history as a response from the assistant, not the user
             self._add_to_history("assistant", critique)
 
+            # Check for early stopping if improvement is minimal
             improvement = grade - previous_grade
             if improvement < self.improvement_threshold:
                 print(f"No significant improvement, stopping early after iteration {iteration + 1}.")
                 break
 
+            # Check if satisfactory grade has been reached
             if grade >= 9:
                 print("Achieved satisfactory grade.")
                 break
 
-            # Use the same prompt for improvements (constant)
-            #cover_letter = self.cover_letter_gen.generate_cover_letter(self.history[-2]["content"],history=self.history)
-            cover_letter = self.cover_letter_gen.generate_cover_letter(cv_text,job_description_text)
+            # Incorporate critique into the next improvement step
+            improvement_prompt = f"""
+            Based on the provided job description, CV, original cover letter, and the critique, 
+            improve the cover letter to address the weaknesses pointed out. Tailor the letter 
+            to better match the job requirements and highlight the most relevant skills and 
+            experience.
 
-            # Add improved cover letter to history
-            self._add_to_history("user", cover_letter)
+            Job Description:
+            {job_description_text}
+
+            CV:
+            {cv_text}
+
+            Original Cover Letter:
+            {cover_letter}
+
+            Critique:
+            {critique}
+
+            Keep the tone professional, concise, and focused on the strengths of the candidate.
+            """
+
+            # Add user input for improvement prompt
+            self._add_to_history("user", improvement_prompt)
+
+            # Generate improved cover letter based on critique and prompt
+            cover_letter = self.cover_letter_gen.get_response(improvement_prompt, history=self.history)
+
+            # Add improved cover letter as an assistant response
             self._add_to_history("assistant", cover_letter)
 
             previous_grade = grade
 
-        return cover_letter,critique
+        return cover_letter, critique
+
+
