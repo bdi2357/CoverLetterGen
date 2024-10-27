@@ -2,41 +2,9 @@ import os,re
 # Assume the required imports from the respective modules (like OpenAIModel, GeminiModel, etc.)
 from cv_info_extractor import load_and_extract_text
 from ai_interaction import OpenAIModel, GeminiModel
-
-def extract_information_from_cv(cv_text):
-    """
-    Extracts applicant's name, email, phone, address, GitHub, and LinkedIn from the provided CV text.
-
-    Args:
-        cv_text (str): The full text of the CV.
-
-    Returns:
-        dict: A dictionary containing the extracted information.
-    """
-    prompt = f"""
-    Extract the following information from the given CV text:
-    - Full name of the applicant
-    - Email address
-    - Phone number
-    - Physical address
-    - GitHub profile (if present)
-    - LinkedIn profile (if present)
-
-    If any of the information is missing, simply omit it from the result. Provide the output in a structured format.
-
-    Here is the CV text:
-    \"{cv_text}\"
-    """
-
-    response = get_llm_response(prompt)
-
-    if response:
-        # Parse the response into a dictionary (assume that the GPT response is structured)
-        extracted_info = parse_extracted_info(response)
-        return extracted_info
-    else:
-        return {}
-
+from ai_interaction import OpenAIModel, CVGenerator
+from basic_iterative import BasicIterativeAgent
+from cv_info_extractor import extract_information_from_cv
 
 
 class ContentEvaluator:
@@ -150,6 +118,42 @@ def main(cv_file_path, job_description_text, llm_provider='openai'):
     print("Final Grade is: %0.2f"%grade)
 
 
+def mainN(cv_file_path, job_description_text, llm_provider='openai'):
+    # Load API key securely
+    api_key = os.getenv('OPENAI_API_KEY')
+    if not api_key:
+        raise ValueError("API key not found. Please set the appropriate environment variable.")
+
+    # Initialize the appropriate AI model based on the llm_provider argument
+    if llm_provider == 'openai':
+        ai_model = OpenAIModel(api_key=api_key, model_name='gpt-4')
+    else:
+        raise ValueError(f"Unsupported LLM provider: {llm_provider}")
+
+    # Initialize the CVGenerator with the chosen AI model
+    cv_gen = CVGenerator(ai_model)
+
+    # Extract text from the CV file
+    cv_text = load_and_extract_text(cv_file_path)
+
+    # Use extract_information_from_cv to get structured data from CV text
+    cv_data = extract_information_from_cv(cv_text)
+    personal_info = cv_data.get('Full name', '') + ", " + cv_data.get('Email', '')
+    job_history = cv_data.get('Professional Summary', 'No job history found')
+    skills = cv_data.get('Key skills', '')
+
+    # Initialize BasicIterativeAgent with the CVGenerator
+    agent = BasicIterativeAgent(cv_gen, max_iterations=3, improvement_threshold=0.1)
+
+    # Generate initial CV and perform iterative improvements
+    generated_cv, final_critique = agent.improve_cv(cv_text,personal_info, job_history, skills, job_description_text)
+
+    # Output the final improved CV and critique
+    print("Final Improved CV:")
+    print(generated_cv)
+    print("\nFinal Critique:")
+    print(final_critique)
+
 if __name__ == "__main__":
     cv_file_path = os.path.join("Data", 'CV_GPT_rev.pdf')
     job_description_text = """
@@ -174,4 +178,4 @@ if __name__ == "__main__":
     """
 
     # You can specify the LLM provider to test different models
-    main(cv_file_path, job_description_text, llm_provider="openai")
+    mainN(cv_file_path, job_description_text, llm_provider="openai")

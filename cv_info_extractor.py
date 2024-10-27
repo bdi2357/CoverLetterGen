@@ -37,7 +37,7 @@ def get_llm_response(prompt):
 
 def extract_information_from_cv(cv_text):
     """
-    Extracts applicant's name, email, phone, address, GitHub, and LinkedIn from the provided CV text.
+    Extracts applicant's name, email, phone, address, GitHub, LinkedIn, and skills from the provided CV text.
 
     Args:
         cv_text (str): The full text of the CV.
@@ -53,6 +53,7 @@ def extract_information_from_cv(cv_text):
     - Physical address
     - GitHub profile (if present)
     - LinkedIn profile (if present)
+    - Key skills (list any technical skills, programming languages, tools, or expertise areas)
 
     If any of the information is missing, simply omit it from the result. Provide the output in a structured format.
 
@@ -68,8 +69,6 @@ def extract_information_from_cv(cv_text):
         return extracted_info
     else:
         return {}
-
-
 def parse_extracted_info(response):
     """
     Parses the structured response from GPT into a dictionary for easy access to the fields.

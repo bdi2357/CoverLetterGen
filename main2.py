@@ -20,7 +20,7 @@ def main(cv_file_path, job_description_text, llm_provider='openai', method='basi
     if llm_provider == 'openai':
         ai_model = OpenAIModel(api_key=api_key, model_name='gpt-4')
     else:
-        raise ValueError(f"Unsupported LLM provider: {llm_provider}")
+        raise ValueError(f"Unsupported LLM providerh: {llm_provider}")
 
     # Initialize CoverLetterGenerator
     cover_letter_gen = CoverLetterGenerator(ai_model)

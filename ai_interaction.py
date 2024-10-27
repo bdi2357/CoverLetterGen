@@ -271,3 +271,95 @@ Critique:
 Tailor the letter to the job requirements, highlighting relevant skills and experiences. Keep it professional and concise, no more than 4 sentences. Avoid emotive adjectives. Finalize with 'Best regards,' followed by the applicant's name from the CV."""
         return self.ai_model.get_response(prompt, history=history)
 
+
+# ai_interaction.py
+class CVGenerator:
+    """
+    Class to generate and improve CVs using any LLM model.
+    """
+
+    def __init__(self, ai_model):
+        """
+        Initialize with an instance of LLMModel.
+
+        Args:
+            ai_model (LLMModel): The LLM model to use for generation.
+        """
+        self.ai_model = ai_model
+
+    def generate_cv(self, cv_content, job_description_text, original_cv, history=None):
+        """
+        Generate an improved CV based on the original CV and job description.
+
+        Args:
+            cv_content (str): The current version of the CV content.
+            job_description_text (str): The job description text.
+            original_cv (str): The original, full text of the CV.
+
+        Returns:
+            str: The improved CV content.
+        """
+        prompt = f"""Improve the current CV content based on the original CV and job description, ensuring that it highlights relevant skills, achievements, and experiences.
+
+Original CV:
+{original_cv}
+
+Current CV Version:
+{cv_content}
+
+Job Description:
+{job_description_text}
+
+Tailor the CV to the job description, improve clarity, and ensure a professional tone. Update the current CV version while preserving key information from the original CV where necessary."""
+
+        return self.ai_model.get_response(prompt, history=history)
+
+    def create_critique(self, cv_content, original_cv, job_description_text, history=None):
+        """
+        Generate a critique of the CV based on its relevance, structure, and professional appeal.
+
+        Args:
+            cv_content (str): The content of the current version of the CV.
+            original_cv (str): The original, full text of the CV.
+            job_description_text (str): The job description text.
+            history (list): Conversation history.
+
+        Returns:
+            tuple: A tuple containing the critique text and the overall grade.
+        """
+        prompt = f"""Please provide a detailed critique of the following CV, evaluating it based on these criteria:
+
+    1. **Relevance to the Job**: Does the CV highlight skills and experience directly related to the job description?
+    2. **Clarity and Structure**: Is the CV easy to read and well-organized? Are sections like "Experience", "Skills", and "Education" clearly delineated?
+    3. **Skills Presentation**: Are the applicant's skills (technical, soft skills, etc.) adequately represented and aligned with the job's requirements?
+    4. **Achievements and Results**: Does the CV include measurable achievements or quantifiable results where applicable?
+    5. **Professionalism**: Is the tone professional, and is the language free from errors or unnecessary jargon?
+    6. **Overall Impression**: How well does the CV present the candidate as a suitable fit for the job?
+
+    Consider the original CV content as a reference to ensure important details are not missed.
+
+    Original CV:
+    {original_cv}
+
+    Current CV Version:
+    {cv_content}
+
+    **Job Description**:
+    {job_description_text}
+
+    Provide an overall grade on a scale of 1-10 at the end in the format: **#Overall Grade : NUMBER#**"""
+
+        response = self.ai_model.get_response(prompt, history=history)
+
+        if response is None:
+            raise ValueError("Failed to get a response from the AI model.")
+
+        # Adjusted regular expression to allow flexibility in spaces and format
+        match = re.search(r"#Overall Grade\s*:\s*(\d+(\.\d+)?)\s*/?\d*\s*#", response)
+        if match:
+            grade = float(match.group(1))
+        else:
+            raise ValueError("Failed to extract overall grade from the critique.")
+
+        return response, grade
+

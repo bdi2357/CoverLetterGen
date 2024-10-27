@@ -1,7 +1,7 @@
 # basic_iterative.py
 
 class BasicIterativeAgent:
-    def __init__(self, cover_letter_gen, max_iterations=10, improvement_threshold=0.05):
+    def __init__(self, cover_letter_gen, max_iterations=10, improvement_threshold=0.0):
         """
         Initialize the BasicIterativeAgent with a CoverLetterGenerator and hyperparameters.
 
@@ -15,6 +15,7 @@ class BasicIterativeAgent:
         self.improvement_threshold = improvement_threshold
         self.history = []
         self.grades = []
+
 
     def generate_cover_letter(self, cv_text, job_description_text):
         """
@@ -123,5 +124,54 @@ Tailor the letter to the specific job requirements and showcase the candidate's 
             previous_grade = grade
 
         return cover_letter, critique
+
+    def improve_cv(self, original_cv, personal_info, job_history, skills, job_description_text):
+        """
+        Perform iterative improvements on the CV based on critiques.
+
+        Args:
+            original_cv (str): The full text of the original CV.
+            personal_info (str): The personal information text from the CV.
+            job_history (str): The job history text from the CV.
+            skills (str): The skills extracted from the CV.
+            job_description_text (str): The job description text.
+
+        Returns:
+            tuple: The improved CV and final critique.
+        """
+        total_reward = 0
+        previous_grade = 0
+        cv_content = f"{personal_info}\n\n{job_history}\n\n{skills}"  # Combined content for initial CV
+
+        for iteration in range(self.max_iterations):
+            # Use the full original CV in the critique prompt for better context
+            critique, grade = self.cover_letter_gen.create_critique(cv_content, original_cv, job_description_text, history=self.history)
+            total_reward += grade
+            self.grades.append(grade)
+            print(f"Iteration {iteration + 1}, Grade: {grade}, Cumulative Reward: {total_reward}")
+
+            # Add critique to history
+            self._add_to_history("user", critique)
+            self._add_to_history("assistant", critique)
+
+            improvement = grade - previous_grade
+            if improvement < self.improvement_threshold:
+                print(f"No significant improvement, stopping early after iteration {iteration + 1}.")
+                break
+
+            if grade >= 9:
+                print("Achieved satisfactory grade.")
+                break
+
+            # Generate updated CV content based on critique and original CV
+            cv_content = self.cover_letter_gen.generate_cv(cv_content, job_description_text, original_cv)
+
+            # Add improved CV to history
+            self._add_to_history("user", cv_content)
+            self._add_to_history("assistant", cv_content)
+
+            previous_grade = grade
+
+        return cv_content, critique
 
 
