@@ -1,161 +1,88 @@
-import os
-from openai import OpenAI
-from dotenv import load_dotenv
 from docx import Document
-from docx.shared import Pt, RGBColor
-from data_handling import load_and_extract_text
-# Load OpenAI API key from .env file
-load_dotenv('.env', override=True)
-openai_api_key = os.getenv('OPENAI_API_KEY')
+from docx.enum.text import WD_ALIGN_PARAGRAPH
+from docx.shared import Pt
+from docx.oxml.ns import qn
+from docx.oxml import OxmlElement
 
-# Set up OpenAI client
-client = OpenAI(api_key=openai_api_key)
-
-def get_llm_response(prompt):
+def generate_cv_document(file_name, finalized_content_cv):
     """
-    Function to get a response from OpenAI GPT model.
-    """
-    try:
-        if not isinstance(prompt, str):
-            raise ValueError("Input must be a string enclosed in quotes.")
-        completion = client.chat.completions.create(
-            model="gpt-4",
-            messages=[
-                {
-                    "role": "system",
-                    "content": "You are a helpful assistant specialized in adapting CVs.",
-                },
-                {"role": "user", "content": prompt},
-            ],
-            temperature=0.0,
-        )
-        response = completion.choices[0].message.content
-        return response
-    except Exception as e:
-        print(f"Error: {str(e)}")
-
-
-def format_header(paragraph, font_size, bold=True, color=(31, 56, 100)):
-    """
-    Formats the paragraph as a header with specified font size, boldness, and color.
-    """
-    run = paragraph.runs[0]
-    run.font.size = Pt(font_size)
-    run.font.color.rgb = RGBColor(*color)
-    run.bold = bold
-
-
-def add_plain_text(doc, content):
-    """
-    Adds plain text content to the document without bullets.
-    This explicitly removes any bullet characters and resets the style to "Normal".
-    """
-    for line in content.split('\n'):
-        line = line.replace('●', '').strip()  # Remove bullet symbols
-        if line:
-            # Add paragraph with explicit "Normal" style to avoid bullets
-            paragraph = doc.add_paragraph(line, style='Normal')
-
-
-def clean_extracted_text(extracted_text):
-    """
-    Cleans the extracted text from a PDF by removing extra newlines and
-    ensuring proper spacing and formatting.
-    """
-    # Remove excessive newlines and extra spaces
-    cleaned_text = "\n".join([line.strip() for line in extracted_text.splitlines() if line.strip()])
-    return cleaned_text
-
-
-def create_cv_doc(original_cv, job_description, file_name):
-    """
-    Adapts a CV based on a job description using GPT-4 and saves it as a DOCX file
-    with professional formatting.
+    Generates a DOCX file for the CV based on the provided content with enhanced graphical presentation.
 
     Parameters:
-    - original_cv (str): The original CV content.
-    - job_description (str): The job description to adapt the CV to.
-    - file_name (str): Name of the DOCX file to be saved.
+    - file_name (str): Name (including path) of the DOCX file to be saved.
+    - finalized_content_cv (str): The complete content of the CV to be added to the document.
     """
-    prompt = f"""
-    Given the following original CV and job description, adapt the CV to align with the job requirements:
-
-    Job Description:
-    {job_description}
-
-    Original CV:
-    {original_cv}
-
-    Focus on relevant skills, experience, and qualifications for the job.
-    """
-
-    # Get the adapted CV from GPT-4
-    adapted_cv = get_llm_response(prompt)
-
-    # Create a DOCX file
     doc = Document()
 
-    # Add proper contact info formatting with line breaks
-    doc.add_paragraph("Itay Ben-Dan", style="Title")
-    doc.add_paragraph("Haarava 20\nHerzliya, Israel 46100", style="Normal")
-    doc.add_paragraph("Cellular: +972544539284", style="Normal")
-    doc.add_paragraph("Email: itaybd@gmail.com", style="Normal")
+    # Set the font style and size for the document
+    style = doc.styles['Normal']
+    font = style.font
+    font.name = 'Arial'
+    font.size = Pt(11)
 
-    # Ensure contact info is formatted clearly with proper line breaks
-    doc.add_paragraph()
-
-    # Split adapted CV into sections and add formatting
-    sections = adapted_cv.split('\n\n')
-
+    # Separate sections by double newlines and process each section
+    sections = finalized_content_cv.split('\n\n')
     for section in sections:
+        # Identify and format each section based on its header or inferred content type
         if "Professional Summary" in section:
-            parts = section.split('\n', 1)
-            content = parts[1] if len(parts) > 1 else parts[0]
-            add_formatted_section(doc, 'Professional Summary', content)
+            add_formatted_section(doc, 'Professional Summary', section, heading_level=1)
         elif "Skills" in section:
-            parts = section.split('\n', 1)
-            content = parts[1] if len(parts) > 1 else parts[0]
-            add_formatted_section(doc, 'Key Skills', content, bullet_points=False)  # No bullets
-        elif "Experience" in section:
-            parts = section.split('\n', 1)
-            content = parts[1] if len(parts) > 1 else parts[0]
-            add_formatted_section(doc, 'Professional Experience', content, bullet_points=False)  # No bullets
+            add_formatted_section(doc, 'Key Skills', section, heading_level=1, bullet_points=True)
+        elif "Experience" in section or "Work Experience" in section:
+            add_formatted_section(doc, 'Professional Experience', section, heading_level=1, bullet_points=True)
         elif "Education" in section:
-            parts = section.split('\n', 1)
-            content = parts[1] if len(parts) > 1 else parts[0]
-            add_formatted_section(doc, 'Education', content, bullet_points=False)  # No bullets
+            add_formatted_section(doc, 'Education', section, heading_level=1)
+        else:
+            # Generic paragraph if no specific section matches
+            doc.add_paragraph(section.strip())
 
     # Save the document
-    doc_path = f'{file_name}.docx'
-    doc.save(doc_path)
-    return doc_path
+    doc.save(file_name)
+    print(f"CV document saved at: {file_name}")
 
-
-def add_formatted_section(doc, section_name, content, bullet_points=False):
+def add_formatted_section(doc, heading, content, heading_level=2, bullet_points=False):
     """
-    Adds a formatted section header and corresponding content to the document without bullets.
+    Helper function to add formatted sections to the DOCX document with graphical formatting.
+
+    Parameters:
+    - doc (Document): The DOCX document.
+    - heading (str): Section heading.
+    - content (str): Section content.
+    - heading_level (int): The level of heading.
+    - bullet_points (bool): Whether to add bullet points to the content.
     """
-    section_paragraph = doc.add_paragraph(section_name)
-    format_header(section_paragraph, font_size=14, bold=True)
+    # Add the section heading
+    doc.add_heading(heading, level=heading_level)
 
-    # Add the section content without bullets
-    add_plain_text(doc, content)
+    # Adjust the font for section headings
+    heading_run = doc.paragraphs[-1].runs[0]
+    heading_run.font.size = Pt(14)
+    heading_run.bold = True
 
+    # Add section content with bullet points if needed
+    if bullet_points:
+        items = content.split('\n')[1:]  # Exclude the first line (heading)
+        for item in items:
+            paragraph = doc.add_paragraph(item.strip(), style='List Bullet')
+            paragraph_formatting(paragraph)
+    else:
+        # Plain text without bullet points
+        paragraph = doc.add_paragraph(content.split('\n', 1)[-1].strip())
+        paragraph_formatting(paragraph)
 
-if __name__ == "__main__":
-    # Example CV and job description
-    sample_pdf_path = os.path.join("Data", 'CV_GPT_rev.pdf')
-    original_cv = load_and_extract_text(sample_pdf_path)
-
-    # Clean the extracted text
-    original_cv = clean_extracted_text(original_cv)
-
-    job_description = """
-    NVIDIA SOC Architecture team is looking for a Senior Data Scientist with SW development skills and HW-System architecture experience. In this position, you will develop datasets, AI models and train AI models for advanced system architecture Power and Performance features, and collaborate with HW & System architects. Strong proficiency in Python, C/C++ required.
+def paragraph_formatting(paragraph):
     """
+    Helper function to apply graphical formatting to a paragraph.
 
-    out = os.path.join("Output", "Itay_Ben_Dan_CV_Final_Fixed_v10_No_Bullets")
-    # Create the CV document with professional formatting and no bullets
-    doc_file_path = create_cv_doc(original_cv, job_description, out)
+    Parameters:
+    - paragraph (Paragraph): The paragraph to format.
+    """
+    # Adjust paragraph spacing and alignment
+    paragraph.alignment = WD_ALIGN_PARAGRAPH.LEFT
+    paragraph_format = paragraph.paragraph_format
+    paragraph_format.space_before = Pt(6)
+    paragraph_format.space_after = Pt(6)
 
-    print(f"The adapted CV has been saved to: {doc_file_path}")
+    # Add a line break element for cleaner formatting if needed
+    line_break = OxmlElement('w:br')
+    paragraph._p.append(line_break)

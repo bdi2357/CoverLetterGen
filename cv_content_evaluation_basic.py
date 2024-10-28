@@ -118,7 +118,7 @@ def main(cv_file_path, job_description_text, llm_provider='openai'):
     print("Final Grade is: %0.2f"%grade)
 
 
-def mainN(cv_file_path, job_description_text, llm_provider='openai'):
+def cv_content_generation(cv_file_path, job_description_text, llm_provider='openai'):
     # Load API key securely
     api_key = os.getenv('OPENAI_API_KEY')
     if not api_key:
@@ -153,6 +153,7 @@ def mainN(cv_file_path, job_description_text, llm_provider='openai'):
     print(generated_cv)
     print("\nFinal Critique:")
     print(final_critique)
+    return generated_cv, final_critique
 
 if __name__ == "__main__":
     cv_file_path = os.path.join("Data", 'CV_GPT_rev.pdf')
@@ -178,4 +179,4 @@ if __name__ == "__main__":
     """
 
     # You can specify the LLM provider to test different models
-    mainN(cv_file_path, job_description_text, llm_provider="openai")
+    cv_content_generation(cv_file_path, job_description_text, llm_provider="openai")
