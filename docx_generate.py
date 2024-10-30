@@ -1,88 +1,176 @@
 from docx import Document
+from docx.shared import Pt, RGBColor
 from docx.enum.text import WD_ALIGN_PARAGRAPH
-from docx.shared import Pt
-from docx.oxml.ns import qn
-from docx.oxml import OxmlElement
+import re,os
 
-def generate_cv_document(file_name, finalized_content_cv):
+def extract_cv_sections(cv_content):
     """
-    Generates a DOCX file for the CV based on the provided content with enhanced graphical presentation.
+    Extracts various sections from the CV content by identifying common section headers.
 
-    Parameters:
-    - file_name (str): Name (including path) of the DOCX file to be saved.
-    - finalized_content_cv (str): The complete content of the CV to be added to the document.
+    Args:
+        cv_content (str): The full text of the CV.
+
+    Returns:
+        dict: A dictionary with section names as keys and section content as values.
+    """
+    section_patterns = {
+        "Name": r"^\s*(.*?)\s*\n",
+        "Contact": r"Contact:(.*?)\n\n",
+        "Summary": r"Summary:(.*?)\n\n",
+        "Experience": r"Experience:(.*?)\n\n",
+        "Education": r"Education:(.*?)\n\n",
+        "Skills": r"Skills:(.*?)\n\n",
+        "Projects": r"Projects:(.*?)\n\n",
+        "Publications": r"Publications:(.*?)\n\n",
+        "LinkedIn": r"LinkedIn:(.*?)\n",
+        "GitHub": r"GitHub:(.*?)\n"
+    }
+
+    sections = {}
+    for section, pattern in section_patterns.items():
+        match = re.search(pattern, cv_content, re.DOTALL | re.MULTILINE)
+        if match:
+            sections[section] = match.group(1).strip()
+        else:
+            sections[section] = ""
+    return sections
+
+
+def format_header(paragraph, font_size=14, bold=True, color=(31, 56, 100)):
+    """
+    Formats the paragraph as a header with specified font size, boldness, and color.
+    """
+    run = paragraph.runs[0]
+    run.font.size = Pt(font_size)
+    run.font.color.rgb = RGBColor(*color)
+    run.bold = bold
+
+def add_section(doc, section_title, content, is_bullet=False):
+    """
+    Adds a section to the document with an optional bullet style.
+    """
+    # Add section header
+    header = doc.add_paragraph(section_title)
+    format_header(header)
+
+    # Add section content
+    if is_bullet:
+        for line in content.split('\n'):
+            if line.strip():
+                doc.add_paragraph(line, style='List Bullet')
+    else:
+        for line in content.split('\n'):
+            if line.strip():
+                paragraph = doc.add_paragraph(line)
+                paragraph.paragraph_format.line_spacing = 1.15
+
+
+def generate_cv_document(file_name, sections):
+    """
+    Generate and save a CV document based on structured content sections.
+
+    Args:
+        file_name (str): Destination path for the generated CV.
+        sections (dict): Extracted sections of the CV, e.g., {"Name": ..., "Experience": ...}
     """
     doc = Document()
 
-    # Set the font style and size for the document
-    style = doc.styles['Normal']
-    font = style.font
-    font.name = 'Arial'
-    font.size = Pt(11)
+    # Add Name and Contact Info
+    doc.add_paragraph(sections.get("Name", "Name Not Provided"), style="Title").alignment = WD_ALIGN_PARAGRAPH.CENTER
+    contact_info = sections.get("Contact", "")
+    phone = sections.get("Phone", "")
+    email = sections.get("Email", "")
+    linkedin = sections.get("LinkedIn", "")
+    github = sections.get("GitHub", "")
 
-    # Separate sections by double newlines and process each section
-    sections = finalized_content_cv.split('\n\n')
-    for section in sections:
-        # Identify and format each section based on its header or inferred content type
-        if "Professional Summary" in section:
-            add_formatted_section(doc, 'Professional Summary', section, heading_level=1)
-        elif "Skills" in section:
-            add_formatted_section(doc, 'Key Skills', section, heading_level=1, bullet_points=True)
-        elif "Experience" in section or "Work Experience" in section:
-            add_formatted_section(doc, 'Professional Experience', section, heading_level=1, bullet_points=True)
-        elif "Education" in section:
-            add_formatted_section(doc, 'Education', section, heading_level=1)
-        else:
-            # Generic paragraph if no specific section matches
-            doc.add_paragraph(section.strip())
+    # Construct contact information string
+    contact = f"{contact_info}\n"
+    if phone:
+        contact += f"Cellular: {phone}\n"
+    if email:
+        contact += f"Email: {email}\n"
+    if linkedin:
+        contact += f"LinkedIn: {linkedin}\n"
+    if github:
+        contact += f"GitHub: {github}\n"
+
+    # Add contact info to the document
+    contact_para = doc.add_paragraph(contact)
+    contact_para.alignment = WD_ALIGN_PARAGRAPH.CENTER
+
+    # Add each section with formatting based on content type
+    if "Summary" in sections:
+        add_section(doc, "Professional Summary", sections["Summary"])
+
+    if "Experience" in sections:
+        add_section(doc, "Professional Experience", sections["Experience"], is_bullet=True)
+
+    if "Education" in sections:
+        add_section(doc, "Education", sections["Education"])
+
+    if "Skills" in sections:
+        add_section(doc, "Key Skills", sections["Skills"], is_bullet=True)
+
+    if "Projects" in sections:
+        add_section(doc, "Projects", sections["Projects"], is_bullet=True)
+
+    if "Publications" in sections:
+        add_section(doc, "Publications", sections["Publications"])
 
     # Save the document
     doc.save(file_name)
-    print(f"CV document saved at: {file_name}")
+    print(f"Generated CV document saved as {file_name}")
 
-def add_formatted_section(doc, heading, content, heading_level=2, bullet_points=False):
+
+if __name__ == "__main__":
+    # Example of calling the function with sample structured content
+    file_name = "Improved_CVNN3.docx"
+    finalized_cv_content = {
+        "Name": "Itay Ben-Dan",
+        "Contact": "Haarava 20, Herzliya, Israel 46100",
+        "Phone": "+972544539284",
+        "Email": "itaybd@gmail.com",
+        "Summary": "Senior Data Scientist and Machine Learning Engineer with extensive experience in data engineering, model development...",
+        "Experience": "2017-Present: Machine Learning and Data Science Consultant\n- Developed predictive models from scratch...",
+        "Education": "2009: Ph.D. in Mathematics, Technion, Haifa\n2004: M.Sc. in Mathematics, Technion, Haifa...",
+        "Skills": "- Programming Languages: Python, C++, R, Java\n- Machine Learning Frameworks: TensorFlow, PyTorch, Scikit-learn...",
+        "Projects": "TreeModelVis\n- Developed a visualization tool for decision paths...",
+        "Publications": "Published several papers on Computational Geometry and Machine Learning."
+    }
+
+    finalized_cv_content = """
+    Itay Ben-Dan
+    Contact:
+    Haarava 20, Herzliya, Israel 46100
+    +972544539284
+    itaybd@gmail.com
+    LinkedIn: Itay Ben-Dan
+
+    Summary:
+    Highly skilled AI Developer and Machine Learning Engineer specializing in financial data analytics, invoice reconciliation, and NLP techniques for text analysis...
+
+    Experience:
+    2017-Present: Machine Learning and Data Science Consultant
+    - Developed and deployed AI models for predictive analysis and automated invoice reconciliation...
+
+    Education:
+    2009: Ph.D. in Mathematics, Technion, Haifa
+    - Focus: Discrete Geometry
+
+    Skills:
+    Python, R, C++, Java
+    TensorFlow, PyTorch, Scikit-learn
+    Pandas, NumPy, SQL
+
+    Projects:
+    TreeModelVis
+    - Developed a visualization tool for tree-based models...
+
+    Publications:
+    Published numerous papers in Computational Geometry and Combinatorial Theory.
     """
-    Helper function to add formatted sections to the DOCX document with graphical formatting.
 
-    Parameters:
-    - doc (Document): The DOCX document.
-    - heading (str): Section heading.
-    - content (str): Section content.
-    - heading_level (int): The level of heading.
-    - bullet_points (bool): Whether to add bullet points to the content.
-    """
-    # Add the section heading
-    doc.add_heading(heading, level=heading_level)
+    # Generate the CV
 
-    # Adjust the font for section headings
-    heading_run = doc.paragraphs[-1].runs[0]
-    heading_run.font.size = Pt(14)
-    heading_run.bold = True
-
-    # Add section content with bullet points if needed
-    if bullet_points:
-        items = content.split('\n')[1:]  # Exclude the first line (heading)
-        for item in items:
-            paragraph = doc.add_paragraph(item.strip(), style='List Bullet')
-            paragraph_formatting(paragraph)
-    else:
-        # Plain text without bullet points
-        paragraph = doc.add_paragraph(content.split('\n', 1)[-1].strip())
-        paragraph_formatting(paragraph)
-
-def paragraph_formatting(paragraph):
-    """
-    Helper function to apply graphical formatting to a paragraph.
-
-    Parameters:
-    - paragraph (Paragraph): The paragraph to format.
-    """
-    # Adjust paragraph spacing and alignment
-    paragraph.alignment = WD_ALIGN_PARAGRAPH.LEFT
-    paragraph_format = paragraph.paragraph_format
-    paragraph_format.space_before = Pt(6)
-    paragraph_format.space_after = Pt(6)
-
-    # Add a line break element for cleaner formatting if needed
-    line_break = OxmlElement('w:br')
-    paragraph._p.append(line_break)
+    print(extract_cv_sections(finalized_cv_content))
+    generate_cv_document(file_name, extract_cv_sections(finalized_cv_content))

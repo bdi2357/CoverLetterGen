@@ -5,8 +5,8 @@ from ai_interaction import OpenAIModel, GeminiModel
 from ai_interaction import OpenAIModel, CVGenerator
 from basic_iterative import BasicIterativeAgent
 from cv_info_extractor import extract_information_from_cv
-
-
+from docx_generate import generate_cv_document
+import  time
 class ContentEvaluator:
     def __init__(self, ai_model):
         self.ai_model = ai_model
@@ -156,6 +156,7 @@ def cv_content_generation(cv_file_path, job_description_text, llm_provider='open
     return generated_cv, final_critique
 
 if __name__ == "__main__":
+    start = time.time()
     cv_file_path = os.path.join("Data", 'CV_GPT_rev.pdf')
     job_description_text = """
     We're seeking an AI Developer to join our team. In this role, you'll leverage artificial intelligence and machine learning techniques to improve the invoice reconciliation process and create a unified data format across various financial systems.
@@ -179,4 +180,11 @@ if __name__ == "__main__":
     """
 
     # You can specify the LLM provider to test different models
-    cv_content_generation(cv_file_path, job_description_text, llm_provider="openai")
+    finalized_cv_content , citique_final = cv_content_generation(cv_file_path, job_description_text, llm_provider="openai")
+    file_name = os.path.join("Output", "Improved_CV2.docx")
+
+    generate_cv_document(file_name, finalized_cv_content)
+
+    print(f"Generated CV saved to {file_name}")
+    print("total time %0.2f"%(time.time() - start) )
+
