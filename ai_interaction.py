@@ -93,7 +93,7 @@ class OpenAIModel(LLMModel):
         self.client = openai.OpenAI(api_key=api_key)
         self.model_name = model_name
 
-    def get_response(self, prompt, history=None, temperature=0.7):
+    def get_response(self, prompt, history=None, temperature=0.99):
         """
         Get the response from the OpenAI model for the given prompt.
 

@@ -5,7 +5,7 @@ from ai_interaction import OpenAIModel, GeminiModel
 from ai_interaction import OpenAIModel, CVGenerator
 from basic_iterative import BasicIterativeAgent
 from cv_info_extractor import extract_information_from_cv
-from docx_generate import generate_cv_document
+from docx_generate import generate_cv_document, save_cv_sections_to_file, extract_cv_sections,load_cv_sections_from_file
 import  time
 class ContentEvaluator:
     def __init__(self, ai_model):
@@ -180,11 +180,18 @@ if __name__ == "__main__":
     """
 
     # You can specify the LLM provider to test different models
+
+    file_path = os.path.join("Output", "Sections", "CV.txt")
+
     finalized_cv_content , citique_final = cv_content_generation(cv_file_path, job_description_text, llm_provider="openai")
-    file_name = os.path.join("Output", "Improved_CV2.docx")
+    
+    sections = extract_cv_sections(finalized_cv_content)
+    print("*"*60)
+    print(sections)
+    save_cv_sections_to_file(sections, file_path)
+    #generate_cv_document(file_name, finalized_cv_content)
 
-    generate_cv_document(file_name, finalized_cv_content)
-
-    print(f"Generated CV saved to {file_name}")
+    print(f"Generated CV saved to {file_path}")
+    print(load_cv_sections_from_file(file_path))
     print("total time %0.2f"%(time.time() - start) )
 

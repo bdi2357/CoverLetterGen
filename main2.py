@@ -18,7 +18,7 @@ def main(cv_file_path, job_description_text, llm_provider='openai', method='basi
 
     # Initialize the appropriate AI model based on the llm_provider argument
     if llm_provider == 'openai':
-        ai_model = OpenAIModel(api_key=api_key, model_name='gpt-4')
+        ai_model = OpenAIModel(api_key=api_key, model_name='gpt-4o')
     else:
         raise ValueError(f"Unsupported LLM providerh: {llm_provider}")
 

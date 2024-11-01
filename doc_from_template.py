@@ -3,38 +3,34 @@ import os,re
 from docxtpl import DocxTemplate
 
 # Load the Word document template
-template_path = "Basic professional resume.docx"
-output_path = "Improved_CV_Final.docx"
-def generate_cv(data, output_path, template_path):
-    
-doc = DocxTemplate(template_path)
 
-# Data to populate the template
-data = {
-    "name": "Itay Ben-Dan",
-    "email": "itaybd@gmail.com",
-    "phone": "+972544539284",
-    "website": "linkedin.com/in/itaybendan",
-    "experience": """2017-Present: Machine Learning and Data Science Consultant
-    - Developed and deployed AI models for predictive analysis and automated invoice reconciliation.
-    - Standardized diverse financial data into structured formats.
 
-    2011-2015: Senior Quantitative Researcher, WorldQuant
-    - Created computational models for quantitative strategies in finance.""",
-    "skills": """Python, R, C++, Java
-    TensorFlow, PyTorch, Scikit-learn
-    Pandas, NumPy, SQL""",
-    "projects": """TreeModelVis: Developed a visualization tool for tree-based models to aid decision-making.""",
-    "education": """2009: Ph.D. in Mathematics, Technion, Haifa
-    2004: M.Sc. in Mathematics, Technion, Haifa"""
-}
+def generate_cv(output_path, data, template_path):
+    # Load the template
+    doc = DocxTemplate(template_path)
+    # Render the template with data
+    doc.render(data)
+    # Save the populated document
+    doc.save(f"{output_path}.docx")
 
-# Render the data into the template
-doc.render(data)
-
-# Save the populated document
-doc.save(output_path)
-print(f"Generated CV document saved as {output_path}")
 if __name__ == "__main__":
-    template_path = os.path.join("Templates","Basic professional resume.docx")
-    generate_cv("Itay_Ben_Dan_CV_Final", cv_data,template_path)
+    template_path = os.path.join("Templates", "Basic professional resume.docx")
+    output_path = "Improved_CV_Final.docx"
+
+    cv_data = {
+        "name": "Itay Ben-Dan",
+        "email": "itaybd@gmail.com",
+        "phone": "+972544539284",
+        "website": "itaybd.example.com",
+        "experience": "Machine Learning Consultant with extensive experience in AI...",
+        "skills": "Python, TensorFlow, NLP, Data Analysis",
+        "projects": "TreeModelVis, Financial Data Reconciliation",
+        "education": "PhD in Mathematics, Technion, Haifa"
+    }
+    if not os.path.exists(template_path):
+        print(f"Template file not found at: {template_path}")
+    else:
+        generate_cv("Itay_Ben_Dan_CV_Final", cv_data, template_path)
+        print("Generated CV document saved as Itay_Ben_Dan_CV_Final.docx")
+
+

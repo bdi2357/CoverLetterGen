@@ -34,7 +34,57 @@ def extract_cv_sections(cv_content):
         else:
             sections[section] = ""
     return sections
+def save_cv_sections_to_file(sections, file_path):
+    """
+    Saves the extracted CV sections to a file in a structured format.
 
+    Args:
+        sections (dict): A dictionary containing CV sections as keys and content as values.
+        file_path (str): The path of the file to save the structured output.
+    """
+    print("In save_cv_sections_to_file")
+    with open(file_path, "w", encoding="utf-8") as f:
+        for section, content in sections.items():
+            f.write(f"{section}:\n")
+            f.write(f"{content}\n\n")  # Add spacing for readability
+            print(section,":" ,content)
+    print(f"CV sections saved to {file_path}")
+
+
+def load_cv_sections_from_file(file_path):
+    """
+    Loads CV sections from a structured text file back into a dictionary.
+
+    Args:
+        file_path (str): The path of the file containing the CV sections.
+
+    Returns:
+        dict: A dictionary with section names as keys and section content as values.
+    """
+    sections = {}
+    current_section = None
+    content = []
+
+    with open(file_path, "r", encoding="utf-8") as f:
+        for line in f:
+            # Check if the line is a section header (e.g., "Name:", "Experience:")
+            if line.strip().endswith(":"):
+                # Save previous section if there was any
+                if current_section:
+                    sections[current_section] = "\n".join(content).strip()
+
+                # Start a new section
+                current_section = line.strip()[:-1]  # Remove the colon at the end
+                content = []
+            else:
+                # Add lines to the current section content
+                content.append(line.strip())
+
+        # Save the last section
+        if current_section:
+            sections[current_section] = "\n".join(content).strip()
+
+    return sections
 
 def format_header(paragraph, font_size=14, bold=True, color=(31, 56, 100)):
     """
