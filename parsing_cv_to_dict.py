@@ -17,7 +17,7 @@ class CVParserAI:
         self.client = client
         self.model_name = model_name
 
-    def get_response(self, prompt, history=None, temperature=0.7):
+    def get_response(self, prompt, history=None, temperature=0.01):
         """
         Get the response from the OpenAI model for the given prompt.
 
@@ -64,20 +64,20 @@ class CVParserAI:
 
         {cv_content}
 
-        Please organize this content into structured sections:
-        - Name
-        - Contact Information
-        - LinkedIn
-        - Professional Summary
-        - Work Experience
-        - Education
-        - Skills
-        - Publications
+        Please organize this content into structured sections in JSON format with the following fields:
+        - "Name": (Name of the individual)
+        - "Contact": (Contact information)
+        - "LinkedIn": (LinkedIn profile link)
+        - "Summary": (Professional summary)
+        - "Work Experience": (Experience details)
+        - "Education": (Education details)
+        - "Skills": (Skills list)
+        - "Publications": (Publications list)
 
-        Return each section in a clear and structured dictionary format.
+        Return the result as a JSON dictionary with each section name as the key and the corresponding content as the value. Ensure proper JSON syntax.
         """
 
-        response = self.get_response(prompt, temperature=0.2)
+        response = self.get_response(prompt, temperature=0.05)
         print("HERE")
         if response:
             # Attempt to parse the response assuming it returns a dictionary-like format

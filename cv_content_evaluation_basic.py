@@ -7,6 +7,9 @@ from basic_iterative import BasicIterativeAgent
 from cv_info_extractor import extract_information_from_cv
 from docx_generate import generate_cv_document, save_cv_sections_to_file, extract_cv_sections,load_cv_sections_from_file
 import  time
+from parsing_cv_to_dict import CVParserAI
+from dotenv import load_dotenv
+from openai import OpenAI
 class ContentEvaluator:
     def __init__(self, ai_model):
         self.ai_model = ai_model
@@ -126,7 +129,7 @@ def cv_content_generation(cv_file_path, job_description_text, llm_provider='open
 
     # Initialize the appropriate AI model based on the llm_provider argument
     if llm_provider == 'openai':
-        ai_model = OpenAIModel(api_key=api_key, model_name='gpt-4')
+        ai_model = OpenAIModel(api_key=api_key, model_name='gpt-4o')
     else:
         raise ValueError(f"Unsupported LLM provider: {llm_provider}")
 
@@ -143,7 +146,7 @@ def cv_content_generation(cv_file_path, job_description_text, llm_provider='open
     skills = cv_data.get('Key skills', '')
 
     # Initialize BasicIterativeAgent with the CVGenerator
-    agent = BasicIterativeAgent(cv_gen, max_iterations=3, improvement_threshold=0.1)
+    agent = BasicIterativeAgent(cv_gen, max_iterations=10, improvement_threshold=-1.5)
 
     # Generate initial CV and perform iterative improvements
     generated_cv, final_critique = agent.improve_cv(cv_text,personal_info, job_history, skills, job_description_text)
@@ -181,11 +184,18 @@ if __name__ == "__main__":
 
     # You can specify the LLM provider to test different models
 
-    file_path = os.path.join("Output", "Sections", "CV.txt")
+    file_path = os.path.join("Output", "Sections", "CV_N.txt")
 
     finalized_cv_content , citique_final = cv_content_generation(cv_file_path, job_description_text, llm_provider="openai")
-    
-    sections = extract_cv_sections(finalized_cv_content)
+    load_dotenv('.env', override=True)
+    openai_api_key = os.getenv('OPENAI_API_KEY')
+
+    # Set up OpenAI client
+    client = OpenAI(api_key=openai_api_key)
+
+    # Assume `openai` is the OpenAI client object initialized with your API key
+    parser = CVParserAI(client)
+    sections = parser.parse_cv_sections(finalized_cv_content)
     print("*"*60)
     print(sections)
     save_cv_sections_to_file(sections, file_path)
