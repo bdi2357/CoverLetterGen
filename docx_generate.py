@@ -174,7 +174,7 @@ def generate_cv_document(file_name, sections):
 
 if __name__ == "__main__":
     # Example of calling the function with sample structured content
-    file_name = "Improved_CVNN3.docx"
+    file_name = "Improved_CV_4.docx"
     finalized_cv_content = {
         "Name": "Itay Ben-Dan",
         "Contact": "Haarava 20, Herzliya, Israel 46100",
@@ -223,4 +223,6 @@ if __name__ == "__main__":
     # Generate the CV
 
     print(extract_cv_sections(finalized_cv_content))
-    generate_cv_document(file_name, extract_cv_sections(finalized_cv_content))
+    sections = load_cv_sections_from_file("Output\Sections\CV_N.txt")
+    #generate_cv_document(file_name, extract_cv_sections(finalized_cv_content))
+    generate_cv_document(file_name, sections)

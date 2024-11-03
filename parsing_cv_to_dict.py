@@ -72,6 +72,7 @@ class CVParserAI:
         - "Work Experience": (Experience details)
         - "Education": (Education details)
         - "Skills": (Skills list)
+        - "Projects": (Projects List)
         - "Publications": (Publications list)
 
         Return the result as a JSON dictionary with each section name as the key and the corresponding content as the value. Ensure proper JSON syntax.
@@ -168,4 +169,5 @@ Publications:
     """
     parsed_sections = parser.parse_cv_sections(cv_content)
     print(parsed_sections)
+    print(parsed_sections.keys())
 

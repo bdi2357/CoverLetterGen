@@ -184,7 +184,7 @@ if __name__ == "__main__":
 
     # You can specify the LLM provider to test different models
 
-    file_path = os.path.join("Output", "Sections", "CV_N.txt")
+    file_path = os.path.join("Output", "Sections", "CV_N2.txt")
 
     finalized_cv_content , citique_final = cv_content_generation(cv_file_path, job_description_text, llm_provider="openai")
     load_dotenv('.env', override=True)
