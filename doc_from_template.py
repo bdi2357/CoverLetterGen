@@ -70,25 +70,42 @@ def format_section(section_data):
     if not section_data:
         return ""
 
-    # Handle experience sections as a list of dictionaries
+    # Handle list of dictionaries, like experience or education entries
     if isinstance(section_data, list):
         formatted_items = []
         for item in section_data:
             if isinstance(item, dict):
-                # Specifically format the experience entries
-                position = item.get("Position", "")
-                duration = item.get("Duration", "")
-                responsibilities = item.get("Responsibilities", [])
+                # Detect if it's an "Experience" or "Education" type entry by checking expected keys
+                if "Position" in item and "Duration" in item:
+                    # Format "Experience" entries
+                    position = item.get("Position", "")
+                    duration = item.get("Duration", "")
+                    responsibilities = item.get("Responsibilities", [])
 
-                # Format the position and duration
-                formatted_entry = f"{duration}: {position}"
+                    # Format position and duration
+                    formatted_entry = f"{duration}: {position}"
 
-                # Add each responsibility as a bullet point
-                if responsibilities:
-                    responsibility_text = "\n".join([f" ● {resp}" for resp in responsibilities])
-                    formatted_entry += f"\n{responsibility_text}"
+                    # Add each responsibility as a bullet point
+                    if responsibilities:
+                        responsibility_text = "\n".join([f" ● {resp}" for resp in responsibilities])
+                        formatted_entry += f"\n{responsibility_text}"
 
-                formatted_items.append(formatted_entry)
+                    formatted_items.append(formatted_entry)
+
+                elif "Degree" in item and "Institution" in item:
+                    # Format "Education" entries
+                    degree = item.get("Degree", "")
+                    institution = item.get("Institution", "")
+                    year = item.get("Year", "")
+
+                    # Format degree, institution, and year
+                    formatted_entry = f"{year}: {degree}, {institution}"
+                    formatted_items.append(formatted_entry)
+
+                else:
+                    # General case for other types of dictionaries
+                    formatted_entry = "\n".join([f"{k}: {v}" for k, v in item.items()])
+                    formatted_items.append(formatted_entry)
             else:
                 # For other list items, add them directly
                 formatted_items.append(f" ● {item}")
