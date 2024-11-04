@@ -156,7 +156,7 @@ def generate_cv(file_name, sections, template_path):
     print(f"Generated CV document saved as {output_path}")
 
 if __name__ == "__main__":
-    template_path = os.path.join("Templates", "Basic professional resume.docx")
+    template_path = os.path.join("Templates", "ClassicResume.docx")
     output_path = "Improved_CV_Final.docx"
 
     sections = load_cv_sections_from_file("Output\Sections\CV_N.txt")
@@ -173,7 +173,7 @@ if __name__ == "__main__":
     if not os.path.exists(template_path):
         print(f"Template file not found at: {template_path}")
     else:
-        generate_cv("Itay_Ben_Dan_CV_Final7", sections, template_path)
+        generate_cv("Itay_Ben_Dan_CV_Final9", sections, template_path)
 
     experience_data = [
         {
