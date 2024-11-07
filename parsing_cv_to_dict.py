@@ -166,8 +166,89 @@ Publications:
 - Points with large quadrant depth. Symposium on Computational Geometry 2010: 358-364
 - On a problem about quadrant depth. Comput. Geom. 43(6-7): 587-592 (2010)
 - Points with large alphadepth. J. Comb. Theory, Ser. A 116(3): 747-755 (2009)
+        """
+    cv_content2 ="""
+    **Itay Ben-Dan**  
+    Haarava 20, Herzliya, P.O. Box 5990, Herzliya, Israel 46100  
+    Cell: +972544539284  
+    Email: itaybd@gmail.com  
+    LinkedIn: [itay-ben-dan](https://www.linkedin.com/in/itay-ben-dan-99b6041a/)  
+    GitHub: [BDI2357](https://github.com/BDI2357)
+    
+    ---
+    
+    **Professional Summary**  
+    Accomplished Full Stack AI and Machine Learning Engineer with over a decade of experience translating algorithmic trading strategies into robust, deployable code. My extensive background includes designing, coding, deploying, and optimizing strategies in options, futures, and crypto markets, complemented by expert knowledge in AI-driven analytics and NLP solutions.
+    
+    ---
+    
+    **Work Experience**
+    
+    **Algorithmic Trading & AI Solutions Consultant**  
+    _2017-Present_  
+    - Developed and deployed end-to-end algorithmic trading strategies, focusing on options selling, futures scalping, and crypto trading.
+    - Conducted comprehensive backtesting and statistical analyses, enhancing strategy performance and robustness.
+    - Led the integration of strategies into user-friendly interfaces for retail trading platforms.
+    
+    **Founder & Head of Research, Finzor Ltd.**  
+    _2017-Present_  
+    - Created scalable AI-powered trading systems, ensuring reliability and seamless integration.
+    - Directed strategic initiatives from conception to execution, emphasizing user experience.
+    
+    **Principal Machine Learning Engineer, Palo Alto Networks**  
+    _2016-2017_  
+    - Utilized machine learning for enhanced cybersecurity, specializing in anomaly detection and threat identification.
+    
+    **Senior Quantitative Researcher, WorldQuant**  
+    _2011-2015_  
+    - Innovated quantitative algorithms with rigorous backtesting across diverse asset classes, achieving top performance metrics.
+    
+    ---
+    
+    **Education**  
+    - **Ph.D. in Mathematics** (Discrete Geometry), Technion, Haifa, 2009  
+    - **M.Sc. in Mathematics** (Game Theory), Technion, Haifa, 2004    
+    - **B.Sc. in Mathematics and Computer Science**, Technion, Haifa, 2002, Cum Laude  
+    
+    ---
+    
+    **Technical Skills**  
+    - **Programming Languages:** Python, R, C++, Java  
+    - **Machine Learning Frameworks:** TensorFlow, PyTorch, Scikit-learn  
+    - **NLP & Data Processing:** Pandas, NumPy, SQL  
+    - **Deployment & DevOps:** Docker, Kubernetes, AWS  
+    - **Trading Tools:** Backtrader, QuantConnect, PyAlgoTrade  
+    
+    ---
+    
+    **Projects**
+    
+    **AI Invoice Reconciliation System**  
+    - Developed AI models for automating invoice reconciliation, improving data consistency across financial systems.
+    - Implemented NLP solutions for extracting critical data from invoices.
+    
+    **Algorithmic Trading Deployment Platform**  
+    - Created a deployment platform for retail clients, focused on accessibility and user engagement.
+    
+    **TreeModelVis**  
+    - Developed a tool to visualize and interpret decision paths in tree-based models.  
+    - [GitHub Repository](https://github.com/bdi2357/TreeModelVis)
+    
+    ---
+    
+    **Publications**  
+    - Authored articles on computational geometry enhancing analytical methodologies in scientific journals.
+    
+    ---
+    
+    **Contact**  
+    - **Email:** itaybd@gmail.com  
+    - **Phone:** +972544539284  
+    
+    ---
+    
     """
-    parsed_sections = parser.parse_cv_sections(cv_content)
+    parsed_sections = parser.parse_cv_sections(cv_content2)
     print(parsed_sections)
     print(parsed_sections.keys())
 

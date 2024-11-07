@@ -1,7 +1,7 @@
 # basic_iterative.py
 
 class BasicIterativeAgent:
-    def __init__(self, cover_letter_gen, max_iterations=10, improvement_threshold=-0.5):
+    def __init__(self, cover_letter_gen, max_iterations=4, improvement_threshold=-0.5):
         """
         Initialize the BasicIterativeAgent with a CoverLetterGenerator and hyperparameters.
 

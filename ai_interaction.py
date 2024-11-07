@@ -184,26 +184,33 @@ Tailor the letter to the specific job requirements and showcase the candidate's 
         Returns:
             tuple: A tuple containing the critique text and the overall grade.
         """
-        prompt = f"""I need you to critique a cover letter submitted for an AI Developer role. Evaluate it based on:
+        prompt = f"""I need you to critique a cover letter submitted for an AI Developer role. Evaluate it based on the following criteria:
 
-    1. **Relevance to the Job**
-    2. **Form and Structure**
-    3. **Reliability**
-    4. **Professional Matching**
-    5. **Overall Impression**
+        1. **Relevance to the Job**  
+        2. **Form and Structure**  
+        3. **Reliability**  
+        4. **Professional Matching**  
 
-    Provide an overall grade on a scale of 1-10 at the end in the format: **#Overall Grade : NUMBER#**
+        For each criterion:  
+        - Provide a grade on a scale of 1-10 in the format: **#<Criterion Name> Grade: NUMBER#**  
+        - Accompany each grade with a brief explanation highlighting strengths and areas for improvement.
 
-    **Cover Letter**:
-    {cover_letter}
+        Additionally:  
+        - Provide an **Overall Grade** for the cover letter on a scale of 1-10 using the format: **#Overall Grade: NUMBER#**  
+        - Explain what influenced the overall score, emphasizing key strengths and critical weaknesses.
 
-    **Resume (CV)**:
-    {cv_text}
+        Here are the inputs:
 
-    **Job Description**:
-    {job_description_text}
+        **Cover Letter**:  
+        {cover_letter}  
 
-    Please ensure the grade is clearly provided using this exact format. Do NOT deviate from this format."""
+        **Resume (CV)**:  
+        {cv_text}  
+
+        **Job Description**:  
+        {job_description_text}  
+
+        Please ensure the grades and explanations are clearly structured, following the exact format specified."""
 
         response = self.ai_model.get_response(prompt, history=history)
 
@@ -327,27 +334,50 @@ Tailor the CV to the job description, improve clarity, and ensure a professional
         Returns:
             tuple: A tuple containing the critique text and the overall grade.
         """
-        prompt = f"""Please provide a detailed critique of the following CV, evaluating it based on these criteria:
+        prompt = f"""Provide a detailed critique of the following CV based on these criteria:
 
-    1. **Relevance to the Job**: Does the CV highlight skills and experience directly related to the job description?
-    2. **Clarity and Structure**: Is the CV easy to read and well-organized? Are sections like "Experience", "Skills", and "Education" clearly delineated?
-    3. **Skills Presentation**: Are the applicant's skills (technical, soft skills, etc.) adequately represented and aligned with the job's requirements?
-    4. **Achievements and Results**: Does the CV include measurable achievements or quantifiable results where applicable?
-    5. **Professionalism**: Is the tone professional, and is the language free from errors or unnecessary jargon?
-    6. **Overall Impression**: How well does the CV present the candidate as a suitable fit for the job?
+        1. **Relevance to the Job**  
+           - Does the CV emphasize skills and experiences directly aligned with the job description?  
+           - Grade: **#Relevance to the Job Grade: NUMBER#**  
+           - Explain how well the CV aligns with the job requirements.
 
-    Consider the original CV content as a reference to ensure important details are not missed.
+        2. **Clarity and Structure**  
+           - Is the CV easy to read, well-organized, and logically structured?  
+           - Grade: **#Clarity and Structure Grade: NUMBER#**  
+           - Assess whether the layout enhances readability.
 
-    Original CV:
-    {original_cv}
+        3. **Skills Presentation**  
+           - Are the candidate's technical and soft skills adequately highlighted and relevant?  
+           - Grade: **#Skills Presentation Grade: NUMBER#**  
+           - Highlight strengths and areas for improvement in skills representation.
 
-    Current CV Version:
-    {cv_content}
 
-    **Job Description**:
-    {job_description_text}
+        4. **Professionalism**  
+           - Is the CV professional in tone, free of errors, and written in clear language?  
+           - Grade: **#Professionalism Grade: NUMBER#**  
+           - Note any tone, grammar, or formatting issues.
 
-    Provide an overall grade on a scale of 1-10 at the end in the format: **#Overall Grade : NUMBER#**"""
+        5. **Overall Impression**  
+           - How well does the CV present the candidate as a strong fit for the role?  
+           - Grade: **#Overall Grade: NUMBER#**  
+           - Summarize key strengths and critical weaknesses.
+
+        **Instructions**:  
+        - Ensure each grade follows the specified format **#Criterion Name Grade: NUMBER#**.  
+        - Provide actionable feedback, even if sections are sparse or incomplete.  
+
+        **Inputs**:
+
+        **Original CV**:  
+        {original_cv}  
+
+        **Current CV Version**:  
+        {cv_content}  
+
+        **Job Description**:  
+        {job_description_text}  
+
+        Ensure consistency and provide all grades using the required format."""
 
         response = self.ai_model.get_response(prompt, history=history)
 
@@ -355,11 +385,26 @@ Tailor the CV to the job description, improve clarity, and ensure a professional
             raise ValueError("Failed to get a response from the AI model.")
 
         # Adjusted regular expression to allow flexibility in spaces and format
-        match = re.search(r"#Overall Grade\s*:\s*(\d+(\.\d+)?)\s*/?\d*\s*#", response)
+        print(response)
+        grades = {
+            "Relevance to the Job": r"#Relevance to the Job Grade\s*:\s*(\d+(\.\d+)?)#",
+            "Clarity and Structure": r"#Clarity and Structure Grade\s*:\s*(\d+(\.\d+)?)#",
+            "Skills Presentation": r"#Skills Presentation Grade\s*:\s*(\d+(\.\d+)?)#",
+            "Professionalism": r"#Professionalism Grade\s*:\s*(\d+(\.\d+)?)#",
+            "Overall": r"#Overall Grade\s*:\s*(\d+(\.\d+)?)#",
+        }
+        for name, pattern in grades.items():
+            print(name)
+            match = re.search(pattern, response)
+            if not match:
+                raise ValueError(f"Failed to extract {name} grade.")
+        grade = float(re.search(grades["Overall"], response).group(1) )
+        """
+        match = re.search(r"\*\*Overall Grade:\s*(\d+(\.\d+)?)\*\*", response)
         if match:
             grade = float(match.group(1))
         else:
             raise ValueError("Failed to extract overall grade from the critique.")
-
+        """
         return response, grade
 

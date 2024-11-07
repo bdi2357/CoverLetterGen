@@ -146,7 +146,7 @@ def cv_content_generation(cv_file_path, job_description_text, llm_provider='open
     skills = cv_data.get('Key skills', '')
 
     # Initialize BasicIterativeAgent with the CVGenerator
-    agent = BasicIterativeAgent(cv_gen, max_iterations=10, improvement_threshold=-1.5)
+    agent = BasicIterativeAgent(cv_gen, max_iterations=4, improvement_threshold=-1.5)
 
     # Generate initial CV and perform iterative improvements
     generated_cv, final_critique = agent.improve_cv(cv_text,personal_info, job_history, skills, job_description_text)
@@ -160,31 +160,48 @@ def cv_content_generation(cv_file_path, job_description_text, llm_provider='open
 
 if __name__ == "__main__":
     start = time.time()
-    cv_file_path = os.path.join("Data", 'CV_GPT_rev.pdf')
-    job_description_text = """
-    We're seeking an AI Developer to join our team. In this role, you'll leverage artificial intelligence and machine learning techniques to improve the invoice reconciliation process and create a unified data format across various financial systems.
+    #cv_file_path = os.path.join("Data", 'CV_GPT_rev.pdf')
+    cv_file_path = os.path.join("Data", 'CV_GPTN.pdf')
+    job_description_text = """About the job
+At Logz.io, we are at the forefront of automating observability, pushing the boundaries of cloud observability with AI and cutting-edge technologies. We are integrating Generative AI into our platform to further our journey toward autonomous observability.
 
-    Responsibilities:
-    - Develop and implement AI and machine learning models to automate invoice reconciliation
-    - Create intelligent systems to unify diverse invoice data into a standardized format
-    - Design and build natural language processing (NLP) solutions to extract key information from unstructured invoice data
-    - Implement machine learning algorithms to identify patterns, anomalies, and potential errors in financial data
-    - Collaborate with finance and accounting teams to understand business requirements and integrate AI solutions into existing workflows
-    - Continuously improve and optimize AI models based on new data and changing business needs
 
-    Requirements:
-    - Masters or PhD in Computer Science, Artificial Intelligence, or related field
-    - 3+ years of experience developing AI and machine learning solutions, preferably in finance or accounting domains
-    - Strong programming skills in Python and experience with ML frameworks (e.g., TensorFlow, PyTorch, scikit-learn)
-    - Experience with NLP techniques and text analysis
-    - Familiarity with financial systems, ERP software, and accounting principles
-    - Knowledge of data privacy and security best practices
-    - Excellent problem-solving skills and ability to translate complex business requirements into technical solutions
-    """
+
+
+
+About the Position
+
+At Logz.io, we are focused on advancing key observability metrics, with a particular emphasis on MTTR (mean time to recovery). We are seeking a GenAI Software Tech Leader who will design and build scalable AI solutions. We are looking for someone who enjoys exploring uncharted territories, has the ability to read and interpret scientific papers and other relevant materials, and is unafraid to experiment in both research and development.
+
+
+Responsibilities
+
+Lead the design and implementation of generative AI solutions for observability use cases such as log summarization, root cause analysis, and alert generation.
+Continuously research emerging AI technologies and techniques to enhance our platform.
+Architect scalable infrastructure to support AI-driven features across the Logz.io platform.
+Collaborate with cross-functional teams to define and execute the AI strategy.
+Promote AI best practices, including model performance evaluation, data privacy, and responsible AI deployment5+ years in software engineering, focusing on AI/ML or data-intensive systems.
+
+
+Requirements
+
+5+ years in software engineering, focusing on AI/ML or data-intensive systems.
+Experience with LLMs, orchestration frameworks, RAG, and AI agents.
+Proficiency in Python and strong understanding of prompting best practices for LLMs.
+Creative problem-solving, a "can-do" attitude, and a hacker mindset.
+Ability to communicate complex AI concepts to both technical and non-technical stakeholders.
+
+
+Advantages
+
+Experience with LangChain, LlamaIndex, OpenAI, AWS Lambdas, and AWS Bedrock.
+Familiarity with observability products and telemetry data (logs, traces, metrics).
+Knowledge of MLOps, large-scale data pipelines, NLP, and conversational AI.
+"""
 
     # You can specify the LLM provider to test different models
 
-    file_path = os.path.join("Output", "Sections", "CV_N2.txt")
+    file_path = os.path.join("Output", "Sections", "CV_GPT_N3.txt")
 
     finalized_cv_content , citique_final = cv_content_generation(cv_file_path, job_description_text, llm_provider="openai")
     load_dotenv('.env', override=True)
