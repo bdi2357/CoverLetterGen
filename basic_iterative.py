@@ -127,7 +127,7 @@ Tailor the letter to the specific job requirements and showcase the candidate's 
 
     def improve_cv(self, original_cv, personal_info, job_history, skills, job_description_text):
         """
-        Perform iterative improvements on the CV based on critiques.
+        Perform iterative improvements on the CV based on detailed critiques.
 
         Args:
             original_cv (str): The full text of the original CV.
@@ -137,23 +137,28 @@ Tailor the letter to the specific job requirements and showcase the candidate's 
             job_description_text (str): The job description text.
 
         Returns:
-            tuple: The improved CV and final critique.
+            tuple: The improved CV and the final detailed critique.
         """
         total_reward = 0
         previous_grade = 0
-        cv_content = f"{personal_info}\n\n{job_history}\n\n{skills}"  # Combined content for initial CV
+
+        # Combine initial CV sections
+        cv_content = f"{personal_info}\n\n{job_history}\n\n{skills}"
 
         for iteration in range(self.max_iterations):
-            # Use the full original CV in the critique prompt for better context
-            critique, grade = self.cover_letter_gen.create_critique(cv_content, original_cv, job_description_text, history=self.history)
+            # Obtain a detailed critique and grade for the current CV
+            critique, grade = self.cover_letter_gen.create_critique(
+                cv_content, original_cv, job_description_text, history=self.history
+            )
+
             total_reward += grade
             self.grades.append(grade)
             print(f"Iteration {iteration + 1}, Grade: {grade}, Cumulative Reward: {total_reward}")
 
-            # Add critique to history
-            self._add_to_history("user", critique)
+            # Add critique to the assistant's responses in history
             self._add_to_history("assistant", critique)
 
+            # Early stopping conditions
             improvement = grade - previous_grade
             if improvement < self.improvement_threshold:
                 print(f"No significant improvement, stopping early after iteration {iteration + 1}.")
@@ -163,15 +168,40 @@ Tailor the letter to the specific job requirements and showcase the candidate's 
                 print("Achieved satisfactory grade.")
                 break
 
-            # Generate updated CV content based on critique and original CV
-            cv_content = self.cover_letter_gen.generate_cv(cv_content, job_description_text, original_cv)
+            # Use the critique to guide CV improvements
+            improvement_prompt = f"""
+            Based on the following detailed critique, refine the CV to address the highlighted weaknesses.
+            Focus on improving clarity, relevance, and alignment with the job description.
 
-            # Add improved CV to history
-            self._add_to_history("user", cv_content)
+            **Job Description**:
+            {job_description_text}
+
+            **Original CV**:
+            {original_cv}
+
+            **Current CV Version**:
+            {cv_content}
+
+            **Detailed Critique**:
+            {critique}
+
+            Revise the CV by incorporating specific improvements suggested in each section. 
+            Keep the formatting consistent and ensure quantifiable achievements are emphasized where relevant.
+            """
+
+            # Add the improvement prompt to the user's history
+            self._add_to_history("user", improvement_prompt)
+
+            # Generate the next version of the CV
+            cv_content = self.cover_letter_gen.ai_model.get_response(improvement_prompt, history=self.history)
+
+            # Store the improved CV in the assistant's response history
             self._add_to_history("assistant", cv_content)
 
+            # Update the previous grade
             previous_grade = grade
 
         return cv_content, critique
+
 
 

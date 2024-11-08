@@ -338,28 +338,28 @@ Tailor the CV to the job description, improve clarity, and ensure a professional
 
         1. **Relevance to the Job**  
            - Does the CV emphasize skills and experiences directly aligned with the job description?  
-           - Grade: **#Relevance to the Job Grade: NUMBER#**  
+           - Grade: **#Relevance to the Job Grade: NUMBER##**  
            - Explain how well the CV aligns with the job requirements.
 
         2. **Clarity and Structure**  
            - Is the CV easy to read, well-organized, and logically structured?  
-           - Grade: **#Clarity and Structure Grade: NUMBER#**  
+           - Grade: **#Clarity and Structure Grade: NUMBER##**  
            - Assess whether the layout enhances readability.
 
         3. **Skills Presentation**  
            - Are the candidate's technical and soft skills adequately highlighted and relevant?  
-           - Grade: **#Skills Presentation Grade: NUMBER#**  
+           - Grade: **#Skills Presentation Grade: NUMBER##**  
            - Highlight strengths and areas for improvement in skills representation.
 
 
         4. **Professionalism**  
            - Is the CV professional in tone, free of errors, and written in clear language?  
-           - Grade: **#Professionalism Grade: NUMBER#**  
+           - Grade: **#Professionalism Grade: NUMBER##**  
            - Note any tone, grammar, or formatting issues.
 
         5. **Overall Impression**  
            - How well does the CV present the candidate as a strong fit for the role?  
-           - Grade: **#Overall Grade: NUMBER#**  
+           - Grade: **#Overall Grade: NUMBER##**  
            - Summarize key strengths and critical weaknesses.
 
         **Instructions**:  
@@ -377,15 +377,16 @@ Tailor the CV to the job description, improve clarity, and ensure a professional
         **Job Description**:  
         {job_description_text}  
 
-        Ensure consistency and provide all grades using the required format."""
+        Ensure consistency and provide all grades using the required format. Keeping grades using the required format is very important"""
 
-        response = self.ai_model.get_response(prompt, history=history)
+        response = self.ai_model.get_response(prompt, history=history,temperature= 0.01)
 
         if response is None:
             raise ValueError("Failed to get a response from the AI model.")
 
         # Adjusted regular expression to allow flexibility in spaces and format
         print(response)
+        print("?"*100)
         grades = {
             "Relevance to the Job": r"#Relevance to the Job Grade\s*:\s*(\d+(\.\d+)?)#",
             "Clarity and Structure": r"#Clarity and Structure Grade\s*:\s*(\d+(\.\d+)?)#",
@@ -393,11 +394,27 @@ Tailor the CV to the job description, improve clarity, and ensure a professional
             "Professionalism": r"#Professionalism Grade\s*:\s*(\d+(\.\d+)?)#",
             "Overall": r"#Overall Grade\s*:\s*(\d+(\.\d+)?)#",
         }
+        flag = False
         for name, pattern in grades.items():
             print(name)
             match = re.search(pattern, response)
             if not match:
-                raise ValueError(f"Failed to extract {name} grade.")
+                flag = True
+                #raise ValueError(f"Failed to extract {name} grade.")
+        if flag:
+            response = self.ai_model.get_response(prompt, history=history, temperature=0.01)
+
+            if response is None:
+                raise ValueError("Failed to get a response from the AI model.")
+
+            # Adjusted regular expression to allow flexibility in spaces and format
+            print(response)
+            for name, pattern in grades.items():
+                print(name)
+                match = re.search(pattern, response)
+                if not match:
+                    raise ValueError(f"Failed to extract {name} grade.")
+
         grade = float(re.search(grades["Overall"], response).group(1) )
         """
         match = re.search(r"\*\*Overall Grade:\s*(\d+(\.\d+)?)\*\*", response)

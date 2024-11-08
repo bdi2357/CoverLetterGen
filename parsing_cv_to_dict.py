@@ -8,12 +8,14 @@ from utilities import create_pdf
 from dotenv import load_dotenv
 from dotenv import load_dotenv
 from openai import OpenAI
-
+import time
 load_dotenv('.env', override=True)
 
+import json
+import logging
 
 class CVParserAI:
-    def __init__(self, client, model_name="gpt-3.5-turbo-0125"):
+    def __init__(self, client, model_name="gpt-4o-mini"):
         self.client = client
         self.model_name = model_name
 
@@ -49,6 +51,24 @@ class CVParserAI:
             logging.error(f"An error occurred: {e}")
             return None
 
+    def sanitize_response(self, response):
+        """
+        Sanitize the response to extract the valid JSON block.
+
+        Args:
+            response (str): The response from the model.
+
+        Returns:
+            str: The sanitized JSON string.
+        """
+        try:
+            start = response.index('{')
+            end = response.rindex('}') + 1
+            return response[start:end]
+        except ValueError as e:
+            logging.error(f"Failed to sanitize response: {e}")
+            return "{}"  # Return an empty JSON object if parsing fails
+
     def parse_cv_sections(self, cv_content):
         """
         Parses the CV content by asking the AI model to structure it into defined sections.
@@ -64,7 +84,7 @@ class CVParserAI:
 
         {cv_content}
 
-        Please organize this content into structured sections in JSON format with the following fields:
+        Organize this content into structured sections in JSON format with the following fields:
         - "Name": (Name of the individual)
         - "Contact": (Contact information)
         - "LinkedIn": (LinkedIn profile link)
@@ -72,33 +92,32 @@ class CVParserAI:
         - "Work Experience": (Experience details)
         - "Education": (Education details)
         - "Skills": (Skills list)
-        - "Projects": (Projects List)
+        - "Projects": (Projects list)
         - "Publications": (Publications list)
 
-        Return the result as a JSON dictionary with each section name as the key and the corresponding content as the value. Ensure proper JSON syntax.
+        Return only a valid JSON dictionary with each section name as the key and the corresponding content as the value.
         """
 
-        response = self.get_response(prompt, temperature=0.05)
-        print("HERE")
+        response = self.get_response(prompt, temperature=0.01)
         if response:
-            # Attempt to parse the response assuming it returns a dictionary-like format
+            sanitized_response = self.sanitize_response(response)
             try:
-                # Using eval safely with limited scope
-                parsed_response = eval(response, {"__builtins__": {}}, {})
+                parsed_response = json.loads(sanitized_response)
                 if isinstance(parsed_response, dict):
                     return parsed_response
                 else:
-                    logging.warning("Response was not in dictionary format.")
+                    logging.warning("Response is not a valid dictionary.")
                     return {}
-            except Exception as e:
-                logging.error(f"Failed to parse response as dictionary: {e}")
+            except json.JSONDecodeError as e:
+                logging.error(f"JSON parsing error: {e}")
                 return {}
         else:
+            logging.error("No response received from the model.")
             return {}
-
 
 # Example usage
 if __name__ == "__main__":
+    start = time.time()
     load_dotenv('.env', override=True)
     openai_api_key = os.getenv('OPENAI_API_KEY')
 
@@ -107,7 +126,7 @@ if __name__ == "__main__":
 
     # Assume `openai` is the OpenAI client object initialized with your API key
     parser = CVParserAI(client)
-
+    print("Initialization time is %0.2f" %(time.time() - start))
     cv_content = """
     Itay Ben-Dan
 
@@ -248,7 +267,10 @@ Publications:
     ---
     
     """
+    print("HERE2")
     parsed_sections = parser.parse_cv_sections(cv_content2)
     print(parsed_sections)
     print(parsed_sections.keys())
+    print("total time is %0.2f" %(time.time() - start))
+
 
