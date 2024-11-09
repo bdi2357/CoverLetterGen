@@ -62,21 +62,22 @@ def flatten_section(section):
 def flatten_dict(sections):
     return {key: flatten_section(value) for key, value in sections.items()}
 
-
+"""
 def format_section(section_data):
-    """
-    Recursively format section data to a readable string. Handles dictionaries, lists, and regular strings.
-    """
+    #Recursively format section data to a readable string. Handles dictionaries, lists, and regular strings.
+    
     if not section_data:
         return ""
-
+    print("In format section")
     # Handle list of dictionaries, like experience or education entries
     if isinstance(section_data, list):
         formatted_items = []
         for item in section_data:
             if isinstance(item, dict):
+                print("in dict")
                 # Detect if it's an "Experience" or "Education" type entry by checking expected keys
                 if "Position" in item and "Duration" in item:
+                    print("Im position")
                     # Format "Experience" entries
                     position = item.get("Position", "")
                     duration = item.get("Duration", "")
@@ -87,8 +88,13 @@ def format_section(section_data):
 
                     # Add each responsibility as a bullet point
                     if responsibilities:
-                        responsibility_text = "\n".join([f" ● {resp}" for resp in responsibilities])
-                        formatted_entry += f"\n{responsibility_text}"
+                        print("HERE2")
+                        print("responsibilities", len(responsibilities))
+                        formatted_entry += "\n" + "\n".join(f"  - {resp}" for resp in responsibilities)
+                        
+                        #responsibility_text = "\n".join([f" ● {resp}" for resp in responsibilities])
+                        #formatted_entry += f"\n{responsibility_text}"
+                        
 
                     formatted_items.append(formatted_entry)
 
@@ -105,6 +111,9 @@ def format_section(section_data):
                 else:
                     # General case for other types of dictionaries
                     formatted_entry = "\n".join([f"{k}: {v}" for k, v in item.items()])
+                    print("no position")
+                    print(item)
+                    print(formatted_entry)
                     formatted_items.append(formatted_entry)
             else:
                 # For other list items, add them directly
@@ -126,6 +135,70 @@ def format_section(section_data):
 
     # For strings and other types, return as is
     return str(section_data)
+"""
+def format_section(section_data):
+    """
+    Recursively format section data to a readable string. Handles dictionaries, lists, and regular strings.
+    """
+    if not section_data:
+        return ""
+
+    # Handle list of dictionaries, like experience or education entries
+    if isinstance(section_data, list):
+        formatted_items = []
+        for item in section_data:
+            if isinstance(item, dict):
+                # Detect specific types of entries like "Experience" or "Education"
+                if "Title" in item and "Duration" in item:
+                    # Format "Work Experience" entries
+                    title = item.get("Title", "")
+                    duration = item.get("Duration", "")
+                    responsibilities = item.get("Responsibilities", [])
+
+                    # Format title and duration
+                    formatted_entry = f"{title} ({duration})"
+
+                    # Add responsibilities as indented items
+                    if responsibilities:
+                        responsibility_text = "\n".join(f"  - {resp}" for resp in responsibilities)
+                        formatted_entry += f"\n{responsibility_text}"
+
+                    formatted_items.append(formatted_entry)
+
+                elif "Degree" in item and "Institution" in item:
+                    # Format "Education" entries
+                    degree = item.get("Degree", "")
+                    institution = item.get("Institution", "")
+                    year = item.get("Year", "")
+
+                    # Format degree, institution, and year
+                    formatted_entry = f"{year}: {degree}, {institution}"
+                    formatted_items.append(formatted_entry)
+
+                else:
+                    # General case for other dictionaries
+                    formatted_entry = "\n".join(f"{k}: {v}" for k, v in item.items())
+                    formatted_items.append(formatted_entry)
+            else:
+                # For other list items, format them directly
+                formatted_items.append(f"  - {item}")
+        return "\n\n".join(formatted_items)
+
+    # For dictionaries, format each key-value pair
+    elif isinstance(section_data, dict):
+        formatted_items = []
+        for key, value in section_data.items():
+            if isinstance(value, list):
+                # Format lists within dictionaries
+                formatted_value = "\n".join(f"  - {v}" for v in value)
+                formatted_items.append(f"{key}:\n{formatted_value}")
+            else:
+                formatted_items.append(f"{key}: {value}")
+        return "\n".join(formatted_items)
+
+    # For strings and other types, return as-is
+    return str(section_data)
+
 def generate_cv(file_name, sections, template_path):
     """
     Generate and save a CV document based on structured content sections.
@@ -158,9 +231,10 @@ def generate_cv(file_name, sections, template_path):
 if __name__ == "__main__":
     #template_path = os.path.join("Templates", "ClassicResume.docx")
     template_path = os.path.join("Templates", "StylishResume.docx")
-    output_path = "Improved_CV_Final.docx"
+    #output_path = "Improved_CV_Final.docx"
 
-    sections = load_cv_sections_from_file("Output\Sections\CV_N.txt")
+    #sections = load_cv_sections_from_file("Output\Sections\CV_N.txt")
+    sections = load_cv_sections_from_file("Output\Sections\CV_GPT_N3.txt")
     print(sections)
     sections = flatten_dict(sections)
     print("*"*55)
@@ -171,11 +245,12 @@ if __name__ == "__main__":
         sections["Experience"] = sections.pop(expr[0])
     print("=" * 55)
     print(sections)
+    output_path = os.path.join("Output","CV","test3.docx")
     if not os.path.exists(template_path):
         print(f"Template file not found at: {template_path}")
     else:
-        generate_cv("Itay_Ben_Dan_CV_Final10", sections, template_path)
-
+        generate_cv(output_path, sections, template_path)
+    """
     experience_data = [
         {
             'Position': 'Machine Learning and Data Science Consultant',
@@ -220,6 +295,7 @@ if __name__ == "__main__":
     print(formatted_experience)
     for k in sections.keys():
         print(k,type(sections[k]))
+    """
 
 
 
