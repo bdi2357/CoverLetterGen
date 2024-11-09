@@ -306,18 +306,41 @@ class CVGenerator:
         Returns:
             str: The improved CV content.
         """
-        prompt = f"""Improve the current CV content based on the original CV and job description, ensuring that it highlights relevant skills, achievements, and experiences.
+        prompt = f"""
+        Review and improve the current CV content based on the original CV and the provided job description. Focus on the following:
 
-Original CV:
-{original_cv}
+        1. **Relevance to the Job**  
+           - Identify and incorporate key skills, technologies, and terminologies from the job description into the CV (e.g., {job_description_text}).  
+           - Highlight specific roles, projects, or achievements that directly align with the job's requirements. Ensure that the CV effectively emphasizes the candidate's most relevant experience.
 
-Current CV Version:
-{cv_content}
+        2. **Clarity and Structure**  
+           - Ensure the CV follows a clear and logical structure with well-defined sections: Professional Summary, Experience, Education, Skills, Projects, and Publications.  
+           - Improve readability by using consistent bullet points and formatting. 
 
-Job Description:
-{job_description_text}
+        3. **Achievements and Impact**  
+           - Emphasize measurable achievements (e.g., “Improved system efficiency by 20%”) where possible.  
+           - When specific metrics aren’t available, highlight qualitative impacts to demonstrate the value delivered.
 
-Tailor the CV to the job description, improve clarity, and ensure a professional tone. Update the current CV version while preserving key information from the original CV where necessary."""
+        4. **ATS Optimization**  
+           - Naturally incorporate keywords and phrases from the job description throughout the CV.  
+           - Ensure that relevant technologies and industry-specific jargon are included in the Professional Summary, Experience, and Skills sections to enhance ATS compatibility.
+
+        5. **Professional Tone**  
+           - Maintain a concise and professional tone throughout. Ensure there are no grammatical errors or formatting inconsistencies.
+
+        Update the current CV version based on these guidelines while preserving essential information from the original CV.
+
+        **Inputs**:
+
+        **Original CV**:  
+        {original_cv}  
+
+        **Current CV Version**:  
+        {cv_content}  
+
+        **Job Description**:  
+        {job_description_text}  
+        """
 
         return self.ai_model.get_response(prompt, history=history)
 

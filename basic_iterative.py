@@ -92,25 +92,25 @@ Tailor the letter to the specific job requirements and showcase the candidate's 
 
             # Incorporate critique into the next improvement step
             improvement_prompt = f"""
-            Based on the provided job description, CV, original cover letter, and the critique, 
-            improve the cover letter to address the weaknesses pointed out. Tailor the letter 
-            to better match the job requirements and highlight the most relevant skills and 
-            experience.
+                        Based on the provided job description, CV, original cover letter, and the critique, 
+                        improve the cover letter to address the weaknesses pointed out. Tailor the letter 
+                        to better match the job requirements and highlight the most relevant skills and 
+                        experience.
 
-            Job Description:
-            {job_description_text}
+                        Job Description:
+                        {job_description_text}
 
-            CV:
-            {cv_text}
+                        CV:
+                        {cv_text}
 
-            Original Cover Letter:
-            {cover_letter}
+                        Original Cover Letter:
+                        {cover_letter}
 
-            Critique:
-            {critique}
+                        Critique:
+                        {critique}
 
-            Keep the tone professional, concise, and focused on the strengths of the candidate.
-            """
+                        Keep the tone professional, concise, and focused on the strengths of the candidate.
+                        """
 
             # Add user input for improvement prompt
             self._add_to_history("user", improvement_prompt)
@@ -170,23 +170,51 @@ Tailor the letter to the specific job requirements and showcase the candidate's 
 
             # Use the critique to guide CV improvements
             improvement_prompt = f"""
-            Based on the following detailed critique, refine the CV to address the highlighted weaknesses.
-            Focus on improving clarity, relevance, and alignment with the job description.
+            Based on the provided job description, CV, original version, and critique, improve the CV to address the following areas. Use specific suggestions from the critique to guide improvements in each category:
 
-            **Job Description**:
+            ### References to Critique Suggestions:
+            - **Relevance to the Job**: Incorporate suggestions such as "{critique.split('**1. Relevance to the Job**')[1].split('**')[0].strip()}".
+            - **Clarity and Structure**: "{critique.split('**2. Clarity and Structure**')[1].split('**')[0].strip()}".
+            - **Skills Presentation**: "{critique.split('**3. Skills Presentation**')[1].split('**')[0].strip()}".
+            - **Professionalism**: "{critique.split('**4. Professionalism**')[1].split('**')[0].strip()}".
+            - **Overall Impression**: "{critique.split('**5. Overall Impression**')[1].split('**')[0].strip()}".
+
+            ### Action Points:
+            1. **Relevance to the Job**  
+               - Align content with critical job-specific terminology and technologies, such as LangChain, AWS Bedrock, and observability, as per the critique feedback.
+               - Expand on relevant experiences in projects or roles that demonstrate direct problem-solving capabilities (e.g., reducing MTTR or enhancing telemetry analysis).
+
+            2. **Clarity and Structure**  
+               - Follow a logical and clearly defined CV structure, including sections like **Summary**, **Experience**, and **Skills**. Ensure bullet points are consistently formatted and section headings visually distinct.
+               - Implement any structural improvements suggested in the critique to enhance readability and flow.
+
+            3. **Skills and Measurable Achievements**  
+               - Where metrics or KPIs are available, highlight them (e.g., improved performance by X%, reduced downtime by Y%). 
+               - When exact metrics aren't available, emphasize qualitative results (e.g., improved system scalability) in alignment with critique feedback.
+
+            4. **Professionalism**  
+               - Ensure a professional tone and consistency in grammar and formatting throughout. Address any specific feedback from the critique (e.g., redundant information or repeated sections).
+               - Validate GitHub links or external references to ensure they are correct and active.
+
+            5. **Keyword Optimization for ATS**  
+               - Ensure all key technologies and job-related jargon, as emphasized in the job description, are embedded naturally in relevant sections. 
+               - Optimize keyword distribution to improve ATS compatibility while maintaining readability for human reviewers.
+
+            **Inputs**:
+            - **Job Description**:  
             {job_description_text}
 
-            **Original CV**:
-            {original_cv}
-
-            **Current CV Version**:
+            - **CV**:  
             {cv_content}
 
-            **Detailed Critique**:
+            - **Original CV Version**:  
+            {original_cv}
+
+            - **Critique**:  
             {critique}
 
-            Revise the CV by incorporating specific improvements suggested in each section. 
-            Keep the formatting consistent and ensure quantifiable achievements are emphasized where relevant.
+            **Focus Areas**:
+            Use the critique suggestions dynamically to enhance both ATS and human readability. Ensure all structural and content recommendations are implemented for maximum impact.
             """
 
             # Add the improvement prompt to the user's history
