@@ -387,7 +387,7 @@ class CVGenerator:
 
         **Instructions**:  
         - Ensure each grade follows the specified format **#Criterion Name Grade: NUMBER#**.  
-        - Provide actionable feedback, even if sections are sparse or incomplete.  
+        - Provide Actionable Feedback, even if sections are sparse or incomplete.  
 
         **Inputs**:
 
@@ -418,11 +418,15 @@ class CVGenerator:
             "Overall": r"#Overall Grade\s*:\s*(\d+(\.\d+)?)#",
         }
         flag = False
+        grades_res = {}
         for name, pattern in grades.items():
             print(name)
             match = re.search(pattern, response)
+
             if not match:
                 flag = True
+            else:
+                grades_res[name] = float(re.search(grades[name], response).group(1))
                 #raise ValueError(f"Failed to extract {name} grade.")
         if flag:
             response = self.ai_model.get_response(prompt, history=history, temperature=0.01)
@@ -431,10 +435,12 @@ class CVGenerator:
                 raise ValueError("Failed to get a response from the AI model.")
 
             # Adjusted regular expression to allow flexibility in spaces and format
-            print(response)
+
             for name, pattern in grades.items():
                 print(name)
                 match = re.search(pattern, response)
+                print(float(re.search(grades[name], response).group(1) ))
+                grades_res[name] = float(re.search(grades[name], response).group(1) )
                 if not match:
                     raise ValueError(f"Failed to extract {name} grade.")
 
@@ -446,5 +452,6 @@ class CVGenerator:
         else:
             raise ValueError("Failed to extract overall grade from the critique.")
         """
-        return response, grade
+        print("grades_res",grades_res)
+        return response, grade,grades_res
 

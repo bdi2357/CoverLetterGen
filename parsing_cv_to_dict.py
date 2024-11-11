@@ -88,6 +88,8 @@ class CVParserAI:
         - "Name": (Name of the individual)
         - "Contact": (Contact information)
         - "LinkedIn": (LinkedIn profile link)
+        - "GitHub": (GitHub profile link)
+        - "Webpage": (Webpage profile link)
         - "Summary": (Professional summary)
         - "Work Experience": (Experience details)
         - "Education": (Education details)

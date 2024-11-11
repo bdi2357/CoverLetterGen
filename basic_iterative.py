@@ -1,5 +1,6 @@
 # basic_iterative.py
-
+import  pandas as pd
+import os
 class BasicIterativeAgent:
     def __init__(self, cover_letter_gen, max_iterations=4, improvement_threshold=-0.5):
         """
@@ -144,12 +145,22 @@ Tailor the letter to the specific job requirements and showcase the candidate's 
 
         # Combine initial CV sections
         cv_content = f"{personal_info}\n\n{job_history}\n\n{skills}"
-
+        grades_names = ["Relevance to the Job", "Clarity and Structure","Skills Presentation",
+            "Professionalism","Overall"]
+        grades_df = pd.DataFrame(columns=['iteration']+grades_names)
         for iteration in range(self.max_iterations):
             # Obtain a detailed critique and grade for the current CV
-            critique, grade = self.cover_letter_gen.create_critique(
+            critique, grade, grades_dict = self.cover_letter_gen.create_critique(
                 cv_content, original_cv, job_description_text, history=self.history
             )
+            print("grades_dict\n",grades_dict)
+            iteration_dict = {'iteration': iteration}
+
+            # Merge the dictionaries and convert to DataFrame
+            temp_df = pd.DataFrame({**iteration_dict, **grades_dict}, index=[0])
+
+            # Append to the main DataFrame
+            grades_df = pd.concat([grades_df, temp_df], ignore_index=True)
 
             total_reward += grade
             self.grades.append(grade)
@@ -166,45 +177,48 @@ Tailor the letter to the specific job requirements and showcase the candidate's 
 
             if grade >= 9:
                 print("Achieved satisfactory grade.")
+                grades_df.to_csv(os.path.join("Output","Grades","grades2.csv"), index=False)
+
                 break
 
             # Use the critique to guide CV improvements
             improvement_prompt = f"""
-            Based on the provided job description, CV, original version, and critique, improve the CV to address the following areas. Use specific suggestions from the critique to guide improvements in each category:
+            You are tasked with improving the candidate's CV iteratively. Your goal is to align the CV with the job description, ensure factual correctness, and enhance readability and impact. In each iteration, you must address the critique points and ensure measurable improvements in the following categories:
 
-            ### References to Critique Suggestions:
-            - **Relevance to the Job**: Incorporate suggestions such as "{critique.split('**1. Relevance to the Job**')[1].split('**')[0].strip()}".
-            - **Clarity and Structure**: "{critique.split('**2. Clarity and Structure**')[1].split('**')[0].strip()}".
-            - **Skills Presentation**: "{critique.split('**3. Skills Presentation**')[1].split('**')[0].strip()}".
-            - **Professionalism**: "{critique.split('**4. Professionalism**')[1].split('**')[0].strip()}".
-            - **Overall Impression**: "{critique.split('**5. Overall Impression**')[1].split('**')[0].strip()}".
+            ### Key Improvement Areas:
+            1. **Relevance to the Job**:
+               - Ensure alignment with the job description by incorporating role-specific skills, tools, and technologies where factually applicable.
+               - Use critique feedback such as "{critique.split('**1. Relevance to the Job**')[1].split('**')[0].strip() if '**1. Relevance to the Job**' in critique else 'No feedback provided'}".
+               - Emphasize directly relevant experience and projects that demonstrate the candidate's ability to meet job requirements.
 
-            ### Action Points:
-            1. **Relevance to the Job**  
-               - Align content with critical job-specific terminology and technologies, such as LangChain, AWS Bedrock, and observability, as per the critique feedback.
-               - Expand on relevant experiences in projects or roles that demonstrate direct problem-solving capabilities (e.g., reducing MTTR or enhancing telemetry analysis).
+            2. **Clarity and Structure**:
+               - Follow a clear and logical structure with consistent formatting.
+               - Address specific feedback such as "{critique.split('**2. Clarity and Structure**')[1].split('**')[0].strip() if '**2. Clarity and Structure**' in critique else 'No feedback provided'}".
+               - Simplify complex descriptions and ensure concise bullet points for quick readability.
 
-            2. **Clarity and Structure**  
-               - Follow a logical and clearly defined CV structure, including sections like **Summary**, **Experience**, and **Skills**. Ensure bullet points are consistently formatted and section headings visually distinct.
-               - Implement any structural improvements suggested in the critique to enhance readability and flow.
+            3. **Skills Presentation**:
+               - Highlight technical and soft skills relevant to the role.
+               - Incorporate suggestions like "{critique.split('**3. Skills Presentation**')[1].split('**')[0].strip() if '**3. Skills Presentation**' in critique else 'No feedback provided'}".
+               - Link specific skills to concrete achievements or projects to demonstrate their practical application.
 
-            3. **Skills and Measurable Achievements**  
-               - Where metrics or KPIs are available, highlight them (e.g., improved performance by X%, reduced downtime by Y%). 
-               - When exact metrics aren't available, emphasize qualitative results (e.g., improved system scalability) in alignment with critique feedback.
+            4. **Professionalism**:
+               - Maintain a professional tone and error-free presentation.
+               - Address any issues with grammar, tone, or formatting based on feedback such as "{critique.split('**4. Professionalism**')[1].split('**')[0].strip() if '**4. Professionalism**' in critique else 'No feedback provided'}".
 
-            4. **Professionalism**  
-               - Ensure a professional tone and consistency in grammar and formatting throughout. Address any specific feedback from the critique (e.g., redundant information or repeated sections).
-               - Validate GitHub links or external references to ensure they are correct and active.
+            5. **Keyword Optimization for ATS**:
+               - Optimize for applicant tracking systems by naturally incorporating keywords from the job description.
+               - Avoid keyword stuffing; ensure that each mention is tied to a specific skill or experience to maintain credibility.
 
-            5. **Keyword Optimization for ATS**  
-               - Ensure all key technologies and job-related jargon, as emphasized in the job description, are embedded naturally in relevant sections. 
-               - Optimize keyword distribution to improve ATS compatibility while maintaining readability for human reviewers.
+            ### Improvement Actions:
+            - **Specific Examples**: For any critique pointing out missing or underdeveloped content, provide detailed examples or elaborations. For instance, if observability tools are mentioned, ensure projects involving telemetry or performance monitoring are highlighted.
+            - **Quantifiable Achievements**: Include measurable outcomes (e.g., reduced downtime by X%) where applicable. If such metrics are not explicitly mentioned, consider emphasizing qualitative impacts.
+            - **Iteration-Specific Changes**: Each iteration must introduce new improvements based on the critique. Refrain from repeating similar changes without adding new value.
 
-            **Inputs**:
+            ### Context:
             - **Job Description**:  
             {job_description_text}
 
-            - **CV**:  
+            - **Current CV**:  
             {cv_content}
 
             - **Original CV Version**:  
@@ -213,22 +227,29 @@ Tailor the letter to the specific job requirements and showcase the candidate's 
             - **Critique**:  
             {critique}
 
-            **Focus Areas**:
-            Use the critique suggestions dynamically to enhance both ATS and human readability. Ensure all structural and content recommendations are implemented for maximum impact.
+            ### Focus:
+            - Ensure dynamic and targeted improvements in each iteration.
+            - Strictly adhere to factual correctness. Do not invent achievements or experiences that are not present in the original CV.
+            - Continuously enhance the CV until all critique points are adequately addressed and grades improve.
+
+            ### Iteration Goal:
+            At the end of each iteration, the improved CV should demonstrate noticeable progress in alignment with the job description and critique feedback.
             """
+
+            print("improvement_prompt")
 
             # Add the improvement prompt to the user's history
             self._add_to_history("user", improvement_prompt)
 
             # Generate the next version of the CV
-            cv_content = self.cover_letter_gen.ai_model.get_response(improvement_prompt, history=self.history)
+            cv_content = self.cover_letter_gen.ai_model.get_response(improvement_prompt, history=self.history , temperature=1.2)
 
             # Store the improved CV in the assistant's response history
             self._add_to_history("assistant", cv_content)
 
             # Update the previous grade
             previous_grade = grade
-
+        grades_df.to_csv(os.path.join("Output", "Grades", "grades2.csv"), index= False)
         return cv_content, critique
 
 
