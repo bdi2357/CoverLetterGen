@@ -1,6 +1,7 @@
 # basic_iterative.py
 import  pandas as pd
 import os
+from ExtractCompanyNameJob import extract_company_name_and_job_name
 class BasicIterativeAgent:
     def __init__(self, cover_letter_gen, max_iterations=4, improvement_threshold=-0.5):
         """
@@ -142,7 +143,7 @@ Tailor the letter to the specific job requirements and showcase the candidate's 
         """
         total_reward = 0
         previous_grade = 0
-
+        company_name_and_job_name = extract_company_name_and_job_name(job_description_text)
         # Combine initial CV sections
         cv_content = f"{personal_info}\n\n{job_history}\n\n{skills}"
         grades_names = ["Relevance to the Job", "Clarity and Structure","Skills Presentation",
@@ -177,7 +178,7 @@ Tailor the letter to the specific job requirements and showcase the candidate's 
 
             if grade >= 9:
                 print("Achieved satisfactory grade.")
-                grades_df.to_csv(os.path.join("Output","Grades","grades2.csv"), index=False)
+                grades_df.to_csv(os.path.join("Output","Grades",company_name_and_job_name + "_grades.csv"), index=False)
 
                 break
 
@@ -249,7 +250,7 @@ Tailor the letter to the specific job requirements and showcase the candidate's 
 
             # Update the previous grade
             previous_grade = grade
-        grades_df.to_csv(os.path.join("Output", "Grades", "grades2.csv"), index= False)
+        grades_df.to_csv(os.path.join("Output", "Grades", company_name_and_job_name +"_grades.csv"), index= False)
         return cv_content, critique
 
 

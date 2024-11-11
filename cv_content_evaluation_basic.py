@@ -10,6 +10,7 @@ import  time
 from parsing_cv_to_dict import CVParserAI
 from dotenv import load_dotenv
 from openai import OpenAI
+from ExtractCompanyNameJob import extract_company_name_and_job_name
 class ContentEvaluator:
     def __init__(self, ai_model):
         self.ai_model = ai_model
@@ -201,41 +202,7 @@ Familiarity with observability products and telemetry data (logs, traces, metric
 Knowledge of MLOps, large-scale data pipelines, NLP, and conversational AI.
 """
 
-    job_description_text = """About the job
-Bigabid focuses on solving the key challenge of growth for mobile apps by building Machine Learning and Big Data-driven technology that can both accurately predict what apps a user will like and connect them in a compelling way. Our technology operates at a scale well beyond some of the largest internet companies, processing over 50 TB of raw data per day, handling over 4 million requests per second, and interacting with over a billion unique users a week.
 
-Our innovative platform is leading-edge with a strong product-market fit. As a result, we're seeing remarkable growth and close to zero customer churn. To support our hyper-growth and continue propelling the growth of some of the biggest names in the mobile industry, we offer a wide range of opportunities for different skill levels and experiences.
-
-We are looking for a senior ML researcher who is passionate about exploring complex data sets, drawing meaningful insights, and building high-quality real-time data products that complement our robust arsenal of industry-leading technologies.
-
-As a senior ML researcher at Bigabid, you will be creating high-impact Machine Learning projects. In close coordination with stakeholders, you will play a major role in driving the data science roadmap and execution by providing the best solution to a game changer business problem.
-
-Deliver end-to-end ML products - including research, model development, prototyping, offline validation, implement in production, and online testing
-Be a key player in the DS group - providing insights, best practices, novel techniques and research, and technical know-how to other data scientists
-Develop ML solutions using advanced DL techniques to a diverse set of problems.
-Analyze huge amounts of complex data to identify meaningful patterns and build useful features for machine learning models
-Apply the scientific method to design, create, tune, and interpret machine learning models
-Perform data manipulation, validation, and cross-domain research
-Come up with new and creative research ideas and insights
-Collaborate with our product and engineering teams to solve problems and identify trends and opportunities.
-
-Requirements:
-
-5+ years experience as a Data Scientist
-2+ years experience working with Deep Learning.
-Experience working with recommender systems - an advantage
-Hands-on experience building and deploying deep learning models to production
-High level scripting and programming skills in Python
-Superior verbal, visual, and written communication skills to educate and work with cross functional teams on controlled experiments.
-Team player, responsible, delivery-oriented
-Troubleshooter, problem-solver who knows how to navigate trade-offs
-Work experience as a data analyst - an advantage
-At least a Master's degree in Computer Science, Math, Physics, Engineering, Statistics or other technical field.
-Experience in ML over user personalization, ad-tech, or highly imbalanced data- an advantage
-
-Excerpt:
-
-As a senior ML researcher at Bigabid, you will be creating high-impact Machine Learning projects. In close coordination with stakeholders, you will play a major role in driving the data science roadmap and execution by providing the best solution to a game changer business problem"""
     job_description_text = """About the job
 About us
 
@@ -303,10 +270,46 @@ Advantage:
 
 Experience with relational (e.g. Vertica, VoltDB) and non-relational (e.g. MongoDB) databases.
 Experience with PMML"""
+    job_description_text = """About the job
+    Bigabid focuses on solving the key challenge of growth for mobile apps by building Machine Learning and Big Data-driven technology that can both accurately predict what apps a user will like and connect them in a compelling way. Our technology operates at a scale well beyond some of the largest internet companies, processing over 50 TB of raw data per day, handling over 4 million requests per second, and interacting with over a billion unique users a week.
+
+    Our innovative platform is leading-edge with a strong product-market fit. As a result, we're seeing remarkable growth and close to zero customer churn. To support our hyper-growth and continue propelling the growth of some of the biggest names in the mobile industry, we offer a wide range of opportunities for different skill levels and experiences.
+
+    We are looking for a senior ML researcher who is passionate about exploring complex data sets, drawing meaningful insights, and building high-quality real-time data products that complement our robust arsenal of industry-leading technologies.
+
+    As a senior ML researcher at Bigabid, you will be creating high-impact Machine Learning projects. In close coordination with stakeholders, you will play a major role in driving the data science roadmap and execution by providing the best solution to a game changer business problem.
+
+    Deliver end-to-end ML products - including research, model development, prototyping, offline validation, implement in production, and online testing
+    Be a key player in the DS group - providing insights, best practices, novel techniques and research, and technical know-how to other data scientists
+    Develop ML solutions using advanced DL techniques to a diverse set of problems.
+    Analyze huge amounts of complex data to identify meaningful patterns and build useful features for machine learning models
+    Apply the scientific method to design, create, tune, and interpret machine learning models
+    Perform data manipulation, validation, and cross-domain research
+    Come up with new and creative research ideas and insights
+    Collaborate with our product and engineering teams to solve problems and identify trends and opportunities.
+
+    Requirements:
+
+    5+ years experience as a Data Scientist
+    2+ years experience working with Deep Learning.
+    Experience working with recommender systems - an advantage
+    Hands-on experience building and deploying deep learning models to production
+    High level scripting and programming skills in Python
+    Superior verbal, visual, and written communication skills to educate and work with cross functional teams on controlled experiments.
+    Team player, responsible, delivery-oriented
+    Troubleshooter, problem-solver who knows how to navigate trade-offs
+    Work experience as a data analyst - an advantage
+    At least a Master's degree in Computer Science, Math, Physics, Engineering, Statistics or other technical field.
+    Experience in ML over user personalization, ad-tech, or highly imbalanced data- an advantage
+
+    Excerpt:
+
+    As a senior ML researcher at Bigabid, you will be creating high-impact Machine Learning projects. In close coordination with stakeholders, you will play a major role in driving the data science roadmap and execution by providing the best solution to a game changer business problem"""
     # You can specify the LLM provider to test different models
-
-    file_path = os.path.join("Output", "Sections", "CV_GPT_N8.txt")
-
+    company_name_and_job_name = extract_company_name_and_job_name(job_description_text)
+    sections_file_path = os.path.join("Output", "Sections", company_name_and_job_name.replace(".","_")+"_sections.txt")
+    critique_file_path = os.path.join("Output", "CritiqueFinal", company_name_and_job_name.replace(".","_")+"_crtitque.txt")
+    cv_content_final_file_path = os.path.join("Output", "Sections",company_name_and_job_name.replace(".", "_") + "_cv_content.txt")
     finalized_cv_content , citique_final = cv_content_generation(cv_file_path, job_description_text, llm_provider="openai")
     load_dotenv('.env', override=True)
     openai_api_key = os.getenv('OPENAI_API_KEY')
@@ -319,10 +322,15 @@ Experience with PMML"""
     sections = parser.parse_cv_sections(finalized_cv_content)
     print("*"*60)
     print(sections)
-    save_cv_sections_to_file(sections, file_path)
+    save_cv_sections_to_file(sections, sections_file_path)
     #generate_cv_document(file_name, finalized_cv_content)
 
-    print(f"Generated CV saved to {file_path}")
-    print(load_cv_sections_from_file(file_path))
+    print(f"Generated CV saved to {sections}")
+    with open(critique_file_path, "w", encoding="utf-8") as f:
+        f.write(f"{citique_final}:\n")
+    with open(cv_content_final_file_path, "w", encoding="utf-8") as f:
+        f.write(f"{finalized_cv_content}:\n")
+
+    print(load_cv_sections_from_file(sections_file_path))
     print("total time %0.2f"%(time.time() - start) )
 

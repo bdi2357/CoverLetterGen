@@ -63,6 +63,17 @@ def get_chat_completion(prompt, history):
     )
     response = completion.choices[0].message.content
     return response
+
+def extract_company_name_and_job_name(job_description_text):
+    return get_llm_response(f"""Given the following job description, extract and return the company name and job title in the format CompanyName_JobName that is each there will be no spaces between the Words in the words in the
+    CompanyName and the JobName, In the JobName each word will be the first Letter in upper case and the rest in lower case for example data scientist  will be written as DataScientist.
+    if the company name is ABC and the job is data scientist the result should return ABC_DataScientist
+
+{job_description_text}
+
+Output the result in the specified format:""")
+
+
 if __name__ == "__main__" :
     job_description_text = """About the job
     Start.io is a mobile marketing and audience platform. Start.io empowers the mobile app ecosystem and simplifies mobile marketing, audience building, and mobile monetization. Start.io 's direct integration with over 500,000 monthly active mobile apps provides access to unprecedented levels of global first-party data, which can be leveraged to understand and predict behaviors, identify new opportunities, and fuel growth.
@@ -93,8 +104,11 @@ if __name__ == "__main__" :
 
     Experience with relational (e.g. Vertica, VoltDB) and non-relational (e.g. MongoDB) databases.
     Experience with PMML"""
-    print_llm_response(f"""Given the following job description, extract and return the company name and job title in the format CompanyName_JobName.
+    print_llm_response(f"""Given the following job description, extract and return the company name and job title in the format CompanyName_JobName that is each there will be no spaces between the Words in the words in the
+    CompanyName and the JobName, In the JobName each word will be the first Letter in upper case and the rest in lower case for example data scientist  will be written as DataScientist.
+    if the company name is ABC and the job is data scientist the result should return ABC_DataScientist
 
 {job_description_text}
 
 Output the result in the specified format:""")
+    print(extract_company_name_and_job_name(job_description_text))
