@@ -237,91 +237,35 @@ def format_section(section_data):
 """
 def format_section(section_data):
     """
-    Recursively format section data to a readable string. Handles dictionaries, lists, and regular strings.
+    Recursively format section data to a readable string. Passes raw lists and dicts for Jinja2.
     """
     if not section_data:
         return ""
 
-    # Handle list of dictionaries, like experience or education entries
+    # Preserve lists and dictionaries for Jinja2
     if isinstance(section_data, list):
-        formatted_items = []
-        for item in section_data:
-            if isinstance(item, dict):
-                # Detect specific types of entries like "Experience" or "Education"
-                if "Title" in item and "Duration" in item:
-                    # Format "Work Experience" entries
-                    title = item.get("Title", "")
-                    duration = item.get("Duration", "")
-                    responsibilities = item.get("Responsibilities", [])
+        return section_data  # Pass raw for Jinja2
 
-                    # Format title and duration
-                    formatted_entry = f"{title} ({duration})"
-
-                    # Add responsibilities as indented items
-                    if responsibilities:
-                        responsibility_text = "\n".join(f"  - {resp}" for resp in responsibilities)
-                        formatted_entry += f"\n{responsibility_text}"
-
-                    formatted_items.append(formatted_entry)
-
-                elif "Degree" in item and "Institution" in item:
-                    # Format "Education" entries
-                    degree = item.get("Degree", "")
-                    institution = item.get("Institution", "")
-                    year = item.get("Year", "")
-
-                    # Format degree, institution, and year
-                    formatted_entry = f"{year}: {degree}, {institution}"
-                    formatted_items.append(formatted_entry)
-
-                else:
-                    # General case for other dictionaries
-                    formatted_entry = "\n".join(f"{k}: {v}" for k, v in item.items())
-                    formatted_items.append(formatted_entry)
-            else:
-                # For other list items, format them directly
-                formatted_items.append(f"  - {item}")
-        return "\n\n".join(formatted_items)
-
-    # For dictionaries, format each key-value pair
     elif isinstance(section_data, dict):
-        formatted_items = []
-        for key, value in section_data.items():
-            if isinstance(value, list):
-                # Format lists within dictionaries
-                formatted_value = "\n".join(f"  - {v}" for v in value)
-                formatted_items.append(f"{key}:\n{formatted_value}")
-            else:
-                formatted_items.append(f"{key}: {value}")
-        return "\n".join(formatted_items)
+        return section_data  # Pass raw for Jinja2
 
-    # For strings and other types, return as-is
+    # Fallback: Plain string for non-iterable
     return str(section_data)
 
 def generate_cv(file_name, sections, template_path):
     """
-    Generate and save a CV document based on structured content sections.
-
-    Args:
-        file_name (str): Destination path for the generated CV.
-        sections (dict): Extracted sections of the CV, e.g., {"Name": ..., "Experience": ...}
-        template_path (str): Path to the template file.
+    Generate and save a CV document with properly structured data for Jinja2 templates.
     """
     doc = DocxTemplate(template_path)
 
-    # Prepare data for the template
+    # Prepare data for template
     data = {}
     for section, content in sections.items():
-        formatted_content = format_section(parse_input(content))
-        if section == "Experience":
-            print("content\n", formatted_content)
-        if section == "Education":
-            print("Education\n", formatted_content)
-            print("Education\n", content)
-        if formatted_content:  # Only add non-empty sections
-            data[section] = formatted_content
+        parsed_content = parse_input(content)  # Parse raw data
+        formatted_content = format_section(parsed_content)  # Format or preserve raw
+        data[section] = formatted_content
 
-    # Render and save the document
+    # Render and save
     doc.render(data)
     output_path = f"{file_name}.docx"
     doc.save(output_path)
