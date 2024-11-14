@@ -97,7 +97,10 @@ def parse_input(input_str):
     Returns:
         any: The evaluated Python object if `input_str` is a Python object; otherwise, the original string.
     """
+    print(input_str)
+    print("ZZZZ")
     if is_python_object(input_str):
+        print("HERE")
         try:
             # Use `ast.literal_eval` to safely evaluate the Python object
             return ast.literal_eval(input_str)
@@ -239,6 +242,8 @@ def format_section(section_data):
     """
     Recursively format section data to a readable string. Passes raw lists and dicts for Jinja2.
     """
+    print("QQQ")
+    print(section_data)
     if not section_data:
         return ""
 
@@ -264,7 +269,7 @@ def generate_cv(file_name, sections, template_path):
         parsed_content = parse_input(content)  # Parse raw data
         formatted_content = format_section(parsed_content)  # Format or preserve raw
         data[section] = formatted_content
-
+    print(data["LinkedIn"])
     # Render and save
     doc.render(data)
     output_path = f"{file_name}.docx"
@@ -278,7 +283,9 @@ if __name__ == "__main__":
     #template_path = os.path.join("Templates", "EnhanceTemplateResume.docx")
     #template_path = os.path.join("Templates", "Resume_Template_GPT.docx")
     #Professional_Resume_Template
-    template_path = os.path.join("Templates", "Professional_Resume_Template.docx")
+    #template_path = os.path.join("Templates", "Professional_Resume_Template.docx")
+    #template_path = os.path.join("Templates", "Formatted_Resume_TemplateE.docx")
+    template_path = os.path.join("Templates", "Revised_Improved_Template.docx")
     #sections = load_cv_sections_from_file("Output\Sections\CV_N.txt")
     sections = load_cv_sections_from_file("Output\Sections\CV_GPT_N3.txt")
     for k in sections.keys():
@@ -288,15 +295,21 @@ if __name__ == "__main__":
             print("dict")
             print(sections[k].keys())
             print([type(sections[k][kk]) for kk in sections[k].keys()])
+            for kk in sections[k].keys():
+                if isinstance(sections[k][kk],dict):
+                    print(kk)
         elif isinstance(sections[k],list):
             print(len(sections[k]))
             print([type(xx) for xx in sections[k]])
+            for xx in sections[k]:
+                if isinstance(xx,dict):
+                    print(xx.keys())
     #print(sections["Skills"])  # This should now be a dictionary
     #print(sections["Work Experience"])  # This should now be a list of dictionaries
     expr = [k for k in sections.keys() if k.lower().find("experience") > -1]
     if len(expr) > 0:
         sections["Experience"] = sections.pop(expr[0])
-    output_path = os.path.join("Output", "CV", "test_NNN.docx")
+    output_path = os.path.join("Output", "CV", "test_basic5.docx")
     if not os.path.exists(template_path):
         print(f"Template file not found at: {template_path}")
     else:
