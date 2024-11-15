@@ -86,30 +86,7 @@ def is_python_object(input_str):
         # If parsing fails, it's likely a regular string and not a Python object
         return False
 
-def parse_input(input_str):
-    """
-    Parses the input string. If it represents a Python object, evaluates it to return the object.
-    If it is a plain string, returns it as-is.
 
-    Args:
-        input_str (str): The input string to parse.
-
-    Returns:
-        any: The evaluated Python object if `input_str` is a Python object; otherwise, the original string.
-    """
-    print(input_str)
-    print("ZZZZ")
-    if is_python_object(input_str):
-        print("HERE")
-        try:
-            # Use `ast.literal_eval` to safely evaluate the Python object
-            return ast.literal_eval(input_str)
-        except (ValueError, SyntaxError) as e:
-            print(f"Failed to evaluate as Python object: {e}")
-            return input_str  # Return the original string if evaluation fails
-    else:
-        # Return as-is if it's not a Python object
-        return input_str
 import ast
 import re
 
@@ -257,6 +234,30 @@ def format_section(section_data):
     # Fallback: Plain string for non-iterable
     return str(section_data)
 
+def parse_input(input_str):
+    """
+    Parses the input string. If it represents a Python object, evaluates it to return the object.
+    If it is a plain string, returns it as-is.
+
+    Args:
+        input_str (str): The input string to parse.
+
+    Returns:
+        any: The evaluated Python object if `input_str` is a Python object; otherwise, the original string.
+    """
+    print(input_str)
+    print("ZZZZ")
+    if is_python_object(input_str):
+        print("HERE")
+        try:
+            # Use `ast.literal_eval` to safely evaluate the Python object
+            return ast.literal_eval(input_str)
+        except (ValueError, SyntaxError) as e:
+            print(f"Failed to evaluate as Python object: {e}")
+            return input_str  # Return the original string if evaluation fails
+    else:
+        # Return as-is if it's not a Python object
+        return input_str
 def generate_cv(file_name, sections, template_path):
     """
     Generate and save a CV document with properly structured data for Jinja2 templates.
@@ -285,11 +286,13 @@ if __name__ == "__main__":
     #Professional_Resume_Template
     #template_path = os.path.join("Templates", "Professional_Resume_Template.docx")
     #template_path = os.path.join("Templates", "Formatted_Resume_TemplateE.docx")
-    template_path = os.path.join("Templates", "Revised_Improved_Template.docx")
+    template_path = os.path.join("Templates", "Final_Revised_Template.docx")
     #sections = load_cv_sections_from_file("Output\Sections\CV_N.txt")
     sections = load_cv_sections_from_file("Output\Sections\CV_GPT_N3.txt")
     for k in sections.keys():
         print(k)
+        if k == "Skills":
+            print(sections[k])
         #print(sections[k])
         if isinstance(sections[k],dict):
             print("dict")
@@ -309,7 +312,7 @@ if __name__ == "__main__":
     expr = [k for k in sections.keys() if k.lower().find("experience") > -1]
     if len(expr) > 0:
         sections["Experience"] = sections.pop(expr[0])
-    output_path = os.path.join("Output", "CV", "test_basic5.docx")
+    output_path = os.path.join("Output", "CV", "test_basic6.docx")
     if not os.path.exists(template_path):
         print(f"Template file not found at: {template_path}")
     else:
