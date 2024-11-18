@@ -3,10 +3,6 @@ import os,re
 from docxtpl import DocxTemplate
 #from docx_generate import load_cv_sections_from_file
 # Load the Word document template
-import ast
-
-import ast
-
 
 def load_cv_sections_from_file(file_path):
     """
@@ -219,8 +215,7 @@ def format_section(section_data):
     """
     Recursively format section data to a readable string. Passes raw lists and dicts for Jinja2.
     """
-    print("QQQ")
-    print(section_data)
+
     if not section_data:
         return ""
 
@@ -245,10 +240,8 @@ def parse_input(input_str):
     Returns:
         any: The evaluated Python object if `input_str` is a Python object; otherwise, the original string.
     """
-    print(input_str)
-    print("ZZZZ")
     if is_python_object(input_str):
-        print("HERE")
+
         try:
             # Use `ast.literal_eval` to safely evaluate the Python object
             return ast.literal_eval(input_str)
@@ -270,7 +263,6 @@ def generate_cv(file_name, sections, template_path):
         parsed_content = parse_input(content)  # Parse raw data
         formatted_content = format_section(parsed_content)  # Format or preserve raw
         data[section] = formatted_content
-    print(data["LinkedIn"])
     # Render and save
     doc.render(data)
     output_path = f"{file_name}.docx"
@@ -294,113 +286,11 @@ def sections2cv(template_path,sections_path,dest_cv_path):
 
 
 if __name__ == "__main__":
-    #template_path = os.path.join("Templates", "ClassicResume.docx")
-    #template_path = os.path.join("Templates", "StylishResume.docx")
-    #output_path = "Improved_CV_Final.docx"
-    #template_path = os.path.join("Templates", "EnhanceTemplateResume.docx")
-    #template_path = os.path.join("Templates", "Resume_Template_GPT.docx")
-    #Professional_Resume_Template
-    #template_path = os.path.join("Templates", "Professional_Resume_Template.docx")
-    #template_path = os.path.join("Templates", "Formatted_Resume_TemplateE.docx")
-    #template_path = os.path.join("Templates", "Final_Revised_Template.docx")
+
     template_path = os.path.join("Templates", "Final_Revised_Template_V2.docx")
     #sections = load_cv_sections_from_file("Output\Sections\CV_N.txt")
     sections_path =  os.path.join("Output","Sections","Start_io_DataScientist_sections.txt")
     dest_cv_path = os.path.join("Output", "CV", "CV_Start_io_DataScientist")
     sections2cv(template_path, sections_path, dest_cv_path)
-    """
-    sections = load_cv_sections_from_file("Output\Sections\Start_io_DataScientist_sections.txt")
-    for k in sections.keys():
-        print(k)
-        if k == "Skills":
-            print(sections[k])
-        #print(sections[k])
-        if isinstance(sections[k],dict):
-            print("dict")
-            print(sections[k].keys())
-            print([type(sections[k][kk]) for kk in sections[k].keys()])
-            for kk in sections[k].keys():
-                if isinstance(sections[k][kk],dict):
-                    print(kk)
-        elif isinstance(sections[k],list):
-            print(len(sections[k]))
-            print([type(xx) for xx in sections[k]])
-            for xx in sections[k]:
-                if isinstance(xx,dict):
-                    print(xx.keys())
-    
-    #print(sections["Skills"])  # This should now be a dictionary
-    #print(sections["Work Experience"])  # This should now be a list of dictionaries
-    expr = [k for k in sections.keys() if k.lower().find("experience") > -1]
-    if len(expr) > 0:
-        sections["Experience"] = sections.pop(expr[0])
-    output_path = os.path.join("Output", "CV", "CV_Start_io_DataScientist.docx")
-    if not os.path.exists(template_path):
-        print(f"Template file not found at: {template_path}")
-    else:
-        generate_cv(output_path, sections, template_path)
-
-    """
-    """
-    print(sections)
-    sections = flatten_dict(sections)
-    print("*"*55)
-    print(sections)
-    print(sections.keys())
-    
-    print("=" * 55)
-    print(sections)
-    output_path = os.path.join("Output","CV","test_NN.docx")
-    if not os.path.exists(template_path):
-        print(f"Template file not found at: {template_path}")
-    else:
-        generate_cv(output_path, sections, template_path)
-    
-    experience_data = [
-        {
-            'Position': 'Machine Learning and Data Science Consultant',
-            'Duration': '2017-Present',
-            'Responsibilities': [
-                'Automated invoice reconciliation using AI, enhancing accuracy in financial operations.',
-                'Unified varied data sources into standardized formats, boosting processing efficiency.',
-                'Developed NLP solutions for extracting insights from unstructured financial data.'
-            ]
-        },
-        {
-            'Position': 'Founder and Head of Research, Finzor Ltd.',
-            'Duration': '2017-Present',
-            'Responsibilities': [
-                'Delivered innovative portfolio management solutions, revolutionizing investment analysis.',
-                'Led a high-performing team in creating scalable, production-ready software tools.'
-            ]
-        },
-        {
-            'Position': 'Principal Machine Learning Engineer, Palo Alto Networks',
-            'Duration': '2016-2017',
-            'Responsibilities': [
-                'Enhanced malware analysis with advanced ML models, refining adaptive security measures.',
-                'Innovated dynamic solutions for real-time updates in anti-malware systems.'
-            ]
-        },
-        {
-            'Position': 'Senior Data Scientist, SparkBeyond',
-            'Duration': '2015-2016',
-            'Responsibilities': [
-                'Developed predictive analytics solutions for time series analysis in finance.',
-                'Implemented automatic feature generation, improving model efficiency.'
-            ]
-        }
-    ]
-
-    # Convert the experience section to a readable format
-    formatted_experience = format_section(experience_data)
-    print(formatted_experience)
-    formatted_experience = format_section(eval(sections["Experience"]))
-    print("="*60)
-    print(formatted_experience)
-    for k in sections.keys():
-        print(k,type(sections[k]))
-    """
-
 
 
