@@ -277,6 +277,22 @@ def generate_cv(file_name, sections, template_path):
     doc.save(output_path)
     print(f"Generated CV document saved as {output_path}")
 
+def sections2cv(template_path,sections_path,dest_cv_path):
+    if not os.path.exists(template_path):
+        print(f"sections file not found at: {sections_path}")
+    else:
+        sections = load_cv_sections_from_file(sections_path)
+    expr = [k for k in sections.keys() if k.lower().find("experience") > -1]
+    if len(expr) > 0:
+        sections["Experience"] = sections.pop(expr[0])
+    if not os.path.exists(template_path):
+        print(f"Template file not found at: {template_path}")
+    else:
+        generate_cv(dest_cv_path, sections, template_path)
+
+
+
+
 if __name__ == "__main__":
     #template_path = os.path.join("Templates", "ClassicResume.docx")
     #template_path = os.path.join("Templates", "StylishResume.docx")
@@ -286,9 +302,14 @@ if __name__ == "__main__":
     #Professional_Resume_Template
     #template_path = os.path.join("Templates", "Professional_Resume_Template.docx")
     #template_path = os.path.join("Templates", "Formatted_Resume_TemplateE.docx")
-    template_path = os.path.join("Templates", "Final_Revised_Template.docx")
+    #template_path = os.path.join("Templates", "Final_Revised_Template.docx")
+    template_path = os.path.join("Templates", "Final_Revised_Template_V2.docx")
     #sections = load_cv_sections_from_file("Output\Sections\CV_N.txt")
-    sections = load_cv_sections_from_file("Output\Sections\CV_GPT_N3.txt")
+    sections_path =  os.path.join("Output","Sections","Start_io_DataScientist_sections.txt")
+    dest_cv_path = os.path.join("Output", "CV", "CV_Start_io_DataScientist")
+    sections2cv(template_path, sections_path, dest_cv_path)
+    """
+    sections = load_cv_sections_from_file("Output\Sections\Start_io_DataScientist_sections.txt")
     for k in sections.keys():
         print(k)
         if k == "Skills":
@@ -307,18 +328,19 @@ if __name__ == "__main__":
             for xx in sections[k]:
                 if isinstance(xx,dict):
                     print(xx.keys())
+    
     #print(sections["Skills"])  # This should now be a dictionary
     #print(sections["Work Experience"])  # This should now be a list of dictionaries
     expr = [k for k in sections.keys() if k.lower().find("experience") > -1]
     if len(expr) > 0:
         sections["Experience"] = sections.pop(expr[0])
-    output_path = os.path.join("Output", "CV", "test_basic6.docx")
+    output_path = os.path.join("Output", "CV", "CV_Start_io_DataScientist.docx")
     if not os.path.exists(template_path):
         print(f"Template file not found at: {template_path}")
     else:
         generate_cv(output_path, sections, template_path)
 
-
+    """
     """
     print(sections)
     sections = flatten_dict(sections)
