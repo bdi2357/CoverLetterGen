@@ -250,8 +250,56 @@ Tailor the letter to the specific job requirements and showcase the candidate's 
 
             # Update the previous grade
             previous_grade = grade
+
+            # Final formatting enforcement
+            enforcement_prompt = """
+            Ensure the final CV adheres strictly to the following format:
+
+            ```plaintext
+            {{Name}}
+            Contact Information
+            Ø  Phone: {{Contact.Cellular}} | Email: {{Contact.Email}}
+            Ø  LinkedIn: {{LinkedIn}} {% if GitHub %}Ø  GitHub: {{GitHub}}{% endif %}
+
+            Summary
+            {{Summary}}
+
+            Work Experience
+            {% for job in Experience %}
+            · {{job.Title}} | ({{job.Duration}})
+            {% for resp in job.Responsibilities %}
+            Ø  {{resp}}
+            {% endfor %}{% endfor %}
+
+            Skills
+            {% for category, category_skills in Skills.items() %}
+            ·         {{category}}:  {% for skill in category_skills %}{{skill}}{% endfor %}
+            {% endfor %}
+
+            Education
+            {% for edu in Education %}
+            ·         {{edu.Degree}} | {{edu.Institution}} | {{edu.Year}} {% if edu.Thesis %}| {{edu.Thesis}}{% endif %}
+            {% endfor %}
+
+            Projects
+            {% for project in Projects %}
+            · {{project.Title}}: {{project.Description}} {% if project.Link %}Ø  Link: {{project.Link}}{% endif %}
+            {% endfor %}
+
+            Publications
+            {% for publication in Publications %}
+            ·         {{publication}}
+            {% endfor %}
+            ```
+            Apply this format to the final CV version.
+            """
+
+            self._add_to_history("user", enforcement_prompt)
+            final_cv = self.cover_letter_gen.ai_model.get_response(enforcement_prompt, history=self.history,
+                                                                   temperature=0.1)
+
         grades_df.to_csv(os.path.join("Output", "Grades", company_name_and_job_name +"_grades.csv"), index= False)
-        return cv_content, critique
+        return final_cv, critique
 
 
 

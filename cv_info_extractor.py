@@ -18,7 +18,7 @@ def get_llm_response(prompt):
         if not isinstance(prompt, str):
             raise ValueError("Input must be a string enclosed in quotes.")
         completion = client.chat.completions.create(
-            model="gpt-3.5-turbo",
+            model="gpt-4o",
             messages=[
                 {
                     "role": "system",
@@ -54,6 +54,9 @@ def extract_information_from_cv(cv_text):
     - GitHub profile (if present)
     - LinkedIn profile (if present)
     - Key skills (list any technical skills, programming languages, tools, or expertise areas)
+    - Homepage (if present)
+    - Projects (if present)
+    - Publications (if present)
 
     If any of the information is missing, simply omit it from the result. Provide the output in a structured format.
 
@@ -66,6 +69,8 @@ def extract_information_from_cv(cv_text):
     if response:
         # Parse the response into a dictionary (assume that the GPT response is structured)
         extracted_info = parse_extracted_info(response)
+        for key, item in extracted_info.items():
+            print(key,"\n",item)
         return extracted_info
     else:
         return {}
@@ -125,7 +130,7 @@ if __name__ == "__main__":
     """
 
     # Extract and print the CV information
-    extract_and_print_cv_info(sample_cv_text)
-    sample_pdf_path = os.path.join("Data", 'CV_GPT_rev.pdf')
+    #extract_and_print_cv_info(sample_cv_text)
+    sample_pdf_path = os.path.join("Data", 'CV_GPT_N.pdf')
     original_cv = load_and_extract_text(sample_pdf_path)
-    extract_and_print_cv_info(sample_cv_text)
+    extract_and_print_cv_info(original_cv)

@@ -69,7 +69,7 @@ class CVParserAI:
             logging.error(f"Failed to sanitize response: {e}")
             return "{}"  # Return an empty JSON object if parsing fails
 
-    def parse_cv_sections(self, cv_content):
+    def parse_cv_sections_O(self, cv_content):
         """
         Parses the CV content by asking the AI model to structure it into defined sections.
 
@@ -116,6 +116,85 @@ class CVParserAI:
         else:
             logging.error("No response received from the model.")
             return {}
+
+    def parse_cv_sections(self, cv_content):
+        """
+        Parses the CV content and organizes it into a structured dictionary compliant with the defined template.
+
+        Args:
+            cv_content (str): The full text of the CV.
+
+        Returns:
+            dict: A dictionary with section names as keys and content formatted to align with the CV template.
+        """
+        prompt = f"""
+        Here is a CV document:
+
+        {cv_content}
+
+        Organize this content into a JSON structure that complies with the following template:
+
+        {{
+            "Name": "Name of the individual",
+            "Contact": {{
+                "Cellular": "Phone number",
+                "Email": "Email address"
+            }},
+            "LinkedIn": "LinkedIn profile link",
+            "GitHub": "GitHub profile link (if available)",
+            "Summary": "Professional summary text",
+            "Experience": [
+                {{
+                    "Title": "Job title",
+                    "Duration": "Job duration",
+                    "Responsibilities": ["Responsibility 1", "Responsibility 2", ...]
+                }}
+            ],
+            "Skills": {{
+                "Category 1": ["Skill 1", "Skill 2"],
+                "Category 2": ["Skill 1", "Skill 2"]
+            }},
+            "Education": [
+                {{
+                    "Degree": "Degree earned",
+                    "Institution": "Educational institution name",
+                    "Year": "Year of graduation",
+                    "Thesis": "Thesis title (if applicable)"
+                }}
+            ],
+            "Projects": [
+                {{
+                    "Title": "Project title",
+                    "Description": "Project description",
+                    "Link": "Project link (if available)"
+                }}
+            ],
+            "Publications": [
+                "Publication 1",
+                "Publication 2"
+            ]
+        }}
+
+        Strictly return the response in valid JSON format, without additional text or explanation.
+        """
+
+        response = self.get_response(prompt, temperature=0.01)
+        if response:
+            sanitized_response = self.sanitize_response(response)
+            try:
+                parsed_response = json.loads(sanitized_response)
+                if isinstance(parsed_response, dict):
+                    return parsed_response
+                else:
+                    logging.warning("Response is not a valid dictionary.")
+                    return {}
+            except json.JSONDecodeError as e:
+                logging.error(f"JSON parsing error: {e}")
+                return {}
+        else:
+            logging.error("No response received from the model.")
+            return {}
+
 
 # Example usage
 if __name__ == "__main__":
@@ -270,6 +349,7 @@ Publications:
     
     """
     print("HERE2")
+    cv_content2 = open("Output/CV_content/NommerusHedgeFunds_DataScientist_cv_content.txt", "r").read()
     parsed_sections = parser.parse_cv_sections(cv_content2)
     print(parsed_sections)
     print(parsed_sections.keys())
