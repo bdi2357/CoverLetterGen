@@ -198,13 +198,13 @@ if __name__ == "__main__":
     #cv_file_path = os.path.join("Data", 'CV_GPT_rev.pdf')
     cv_file_path = os.path.join("Data","CV", 'CV_GPT_N3.pdf')
 
-    job_description_text_file_path = os.path.join("Data","JobDescriptions","Moloco.txt")
+    job_description_text_file_path = os.path.join("Data","JobDescriptions","Darrow.txt")
 
     load_dotenv('.env', override=True)
     openai_api_key = os.getenv('OPENAI_API_KEY')
     output_dir = "Output"
     template_path = os.path.join("Templates", "Final_Revised_Template_V2.docx")
-    job_description_text = open(job_description_text_file_path,"r").read()
+    job_description_text = open(job_description_text_file_path,"r",encoding="utf-8").read()
     #print(job_description_text)
     wrapping_cv_generation(cv_file_path, job_description_text, output_dir, openai_api_key,template_path)
     # Set up OpenAI client
