@@ -6,13 +6,13 @@ from ai_interaction import OpenAIModel, CVGenerator
 from basic_iterative import BasicIterativeAgent
 from cv_info_extractor import extract_information_from_cv
 from docx_generate import generate_cv_document, save_cv_sections_to_file, extract_cv_sections,load_cv_sections_from_file
-import  time
+import time
 from parsing_cv_to_dict import CVParserAI
 from dotenv import load_dotenv
 from openai import OpenAI
 from ExtractCompanyNameJob import extract_company_name_and_job_name
 from doc_from_template import sections2cv
-
+"""
 def cv_content_generation(cv_file_path, job_description_text, llm_provider='openai'):
     # Load API key securely
     api_key = os.getenv('OPENAI_API_KEY')
@@ -42,6 +42,52 @@ def cv_content_generation(cv_file_path, job_description_text, llm_provider='open
 
     # Generate initial CV and perform iterative improvements
     generated_cv, final_critique = agent.improve_cv(cv_text,personal_info, job_history, skills, job_description_text)
+
+    # Output the final improved CV and critique
+    print("Final Improved CV:")
+    print(generated_cv)
+    print("\nFinal Critique:")
+    print(final_critique)
+    return generated_cv, final_critique
+"""
+import importlib
+
+def cv_content_generation(cv_file_path, job_description_text, llm_provider='openai', agent_type='BasicIterativeAgent', agent_module='basic_iterative'):
+    # Load API key securely
+    api_key = os.getenv('OPENAI_API_KEY')
+    if not api_key:
+        raise ValueError("API key not found. Please set the appropriate environment variable.")
+
+    # Initialize the appropriate AI model based on the llm_provider argument
+    if llm_provider == 'openai':
+        ai_model = OpenAIModel(api_key=api_key, model_name='gpt-4o')
+    else:
+        raise ValueError(f"Unsupported LLM provider: {llm_provider}")
+
+    # Initialize the CVGenerator with the chosen AI model
+    cv_gen = CVGenerator(ai_model)
+
+    # Extract text from the CV file
+    cv_text = load_and_extract_text(cv_file_path)
+
+    # Use extract_information_from_cv to get structured data from CV text
+    cv_data = extract_information_from_cv(cv_text)
+    personal_info = cv_data.get('Full name', '') + ", " + cv_data.get('Email', '')
+    job_history = cv_data.get('Professional Summary', 'No job history found')
+    skills = cv_data.get('Key skills', '')
+
+    # Dynamically load the agent class from the specified module
+    try:
+        agent_module_obj = importlib.import_module(agent_module)
+        agent_class = getattr(agent_module_obj, agent_type)
+    except (ModuleNotFoundError, AttributeError) as e:
+        raise ImportError(f"Could not load agent '{agent_type}' from module '{agent_module}': {e}")
+
+    # Initialize the agent dynamically
+    agent = agent_class(cv_gen, max_iterations=4, improvement_threshold=-1.5)
+
+    # Generate initial CV and perform iterative improvements
+    generated_cv, final_critique = agent.improve_cv(cv_text, personal_info, job_history, skills, job_description_text)
 
     # Output the final improved CV and critique
     print("Final Improved CV:")
@@ -86,7 +132,7 @@ if __name__ == "__main__":
     #cv_file_path = os.path.join("Data", 'CV_GPT_rev.pdf')
     cv_file_path = os.path.join("Data","CV", 'CV_GPT_N3.pdf')
 
-    job_description_text_file_path = os.path.join("Data","JobDescriptions","Quince.txt")
+    job_description_text_file_path = os.path.join("Data","JobDescriptions","Cytactic.txt")
 
     load_dotenv('.env', override=True)
     openai_api_key = os.getenv('OPENAI_API_KEY')
