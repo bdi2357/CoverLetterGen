@@ -127,7 +127,7 @@ Tailor the letter to the specific job requirements and showcase the candidate's 
 
         return cover_letter, critique
 
-    def improve_cv(self, original_cv, personal_info, job_history, skills, job_description_text):
+    def improve_cv(self, original_cv,  job_description_text):
         """
         Perform iterative improvements on the CV based on detailed critiques.
 
@@ -145,11 +145,13 @@ Tailor the letter to the specific job requirements and showcase the candidate's 
         previous_grade = 0
         company_name_and_job_name = extract_company_name_and_job_name(job_description_text)
         # Combine initial CV sections
-        cv_content = f"{personal_info}\n\n{job_history}\n\n{skills}"
+        cv_content = self.cover_letter_gen.generate_cv(original_cv, job_description_text, original_cv, history=None)
         grades_names = ["Relevance to the Job", "Clarity and Structure","Skills Presentation",
             "Professionalism","Overall"]
         grades_df = pd.DataFrame(columns=['iteration']+grades_names)
+        final_cv = cv_content
         for iteration in range(self.max_iterations):
+
             # Obtain a detailed critique and grade for the current CV
             critique, grade, grades_dict = self.cover_letter_gen.create_critique(
                 cv_content, original_cv, job_description_text, history=self.history

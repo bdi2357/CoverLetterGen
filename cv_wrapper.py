@@ -4,6 +4,7 @@ from cv_info_extractor import load_and_extract_text
 from ai_interaction import OpenAIModel, GeminiModel
 from ai_interaction import OpenAIModel, CVGenerator
 from basic_iterative import BasicIterativeAgent
+from modular_iterative import ModularIterativeAgent
 from cv_info_extractor import extract_information_from_cv
 from docx_generate import generate_cv_document, save_cv_sections_to_file, extract_cv_sections,load_cv_sections_from_file
 import time
@@ -12,6 +13,7 @@ from dotenv import load_dotenv
 from openai import OpenAI
 from ExtractCompanyNameJob import extract_company_name_and_job_name
 from doc_from_template import sections2cv
+
 """
 def cv_content_generation(cv_file_path, job_description_text, llm_provider='openai'):
     # Load API key securely
@@ -87,7 +89,8 @@ def cv_content_generation(cv_file_path, job_description_text, llm_provider='open
     agent = agent_class(cv_gen, max_iterations=4, improvement_threshold=-1.5)
 
     # Generate initial CV and perform iterative improvements
-    generated_cv, final_critique = agent.improve_cv(cv_text, personal_info, job_history, skills, job_description_text)
+    #generated_cv_p = cv_gen.generate_cv(cv_text, job_description_text, cv_text, history=None)
+    generated_cv, final_critique = agent.improve_cv(cv_text, job_description_text)
 
     # Output the final improved CV and critique
     print("Final Improved CV:")
@@ -96,7 +99,7 @@ def cv_content_generation(cv_file_path, job_description_text, llm_provider='open
     print(final_critique)
     return generated_cv, final_critique
 
-def wrapping_cv_generation(cv_file_path,job_description_text, output_dir,openai_api_key, template_path):
+def wrapping_cv_generation(cv_file_path,job_description_text, output_dir,openai_api_key, template_path,agent_type='BasicIterativeAgent', agent_module='basic_iterative'):
     company_name_and_job_name = extract_company_name_and_job_name(job_description_text)
     sections_file_path = os.path.join("Output", "Sections",
                                       company_name_and_job_name.replace(".", "_") + "_sections.txt")
@@ -106,7 +109,8 @@ def wrapping_cv_generation(cv_file_path,job_description_text, output_dir,openai_
                                               company_name_and_job_name.replace(".", "_") + "_cv_content.txt")
     dest_cv_path = os.path.join("Output", "CV","CV_"+company_name_and_job_name.replace(".", "_") )
     finalized_cv_content, citique_final = cv_content_generation(cv_file_path, job_description_text,
-                                                                llm_provider="openai")
+                                                                llm_provider="openai",
+                                                                agent_type=agent_type, agent_module=agent_module)
     client = OpenAI(api_key=openai_api_key)
 
     # Assume `openai` is the OpenAI client object initialized with your API key
@@ -132,7 +136,7 @@ if __name__ == "__main__":
     #cv_file_path = os.path.join("Data", 'CV_GPT_rev.pdf')
     cv_file_path = os.path.join("Data","CV", 'CV_GPT_N3.pdf')
 
-    job_description_text_file_path = os.path.join("Data","JobDescriptions","Cytactic.txt")
+    job_description_text_file_path = os.path.join("Data","JobDescriptions","Rise.txt")
 
     load_dotenv('.env', override=True)
     openai_api_key = os.getenv('OPENAI_API_KEY')
@@ -140,7 +144,8 @@ if __name__ == "__main__":
     template_path = os.path.join("Templates", "Final_Revised_Template_V2.docx")
     job_description_text = open(job_description_text_file_path,"r",encoding="utf-8").read()
     #print(job_description_text)
-    wrapping_cv_generation(cv_file_path, job_description_text, output_dir, openai_api_key,template_path)
+    #wrapping_cv_generation(cv_file_path, job_description_text, output_dir, openai_api_key,template_path, "ModularIterativeAgent", "modular_iterative")
+    wrapping_cv_generation(cv_file_path, job_description_text, output_dir, openai_api_key, template_path,"BasicIterativeAgent", "basic_iterative")
     # Set up OpenAI client
     """ 
     client = OpenAI(api_key=openai_api_key)

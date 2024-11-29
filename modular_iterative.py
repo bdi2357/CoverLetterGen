@@ -1,233 +1,164 @@
-# basic_iterative.py
-import  pandas as pd
+import pandas as pd
 import os
-from ExtractCompanyNameJob import extract_company_name_and_job_name
+from format_combined_cv_with_prompt import format_combined_cv_with_prompt
+desired_structure_template = {
+    "Contact Information": [],
+    "Summary": [],
+    "Work Experience": [],
+    "Skills": {},
+    "Education": [],
+    "Projects": [],
+    "Publications": []
+}
+
 class ModularIterativeAgent:
-    def __init__(self, cover_letter_gen, max_iterations=4, improvement_threshold=-0.5):
+    def __init__(self, llm_client, max_iterations=4, improvement_threshold=-0.5):
         """
-        Initialize the BasicIterativeAgent with a CoverLetterGenerator and hyperparameters.
+        Initialize the agent for iterative CV improvement using LLM.
 
         Args:
-            cover_letter_gen (CoverLetterGenerator): The cover letter generator.
-            max_iterations (int): The maximum number of iterations to perform.
-            improvement_threshold (float): The threshold for stopping when no significant improvement is made.
+            llm_client: The client interface to interact with the LLM.
+            max_iterations (int): The maximum number of iterations to improve the CV.
+            improvement_threshold (float): The threshold for stopping improvement iterations.
         """
-        self.cover_letter_gen = cover_letter_gen
+        self.llm_client = llm_client
         self.max_iterations = max_iterations
         self.improvement_threshold = improvement_threshold
         self.history = []
         self.grades = []
 
-
-    def generate_cover_letter(self, cv_text, job_description_text):
+    def parse_raw_cv(self, raw_cv_text, desired_structure = desired_structure_template):
         """
-        Generate a cover letter using a constant prompt based on the CV and job description.
+        Use LLM to parse raw CV text into a structured format.
 
         Args:
-            cv_text (str): The CV text.
-            job_description_text (str): The job description text.
+            raw_cv_text (str): The unstructured CV text.
+            desired_structure (dict): The desired structured format.
 
         Returns:
-            str: The generated cover letter.
+            dict: A dictionary of parsed CV sections.
         """
-        prompt = f"""Based on the provided job description and CV, write a concise, compelling, and personalized cover letter that highlights relevant skills and experiences.
+        prompt = f"""
+        The following text is an unstructured CV. Extract and organize the information according to this structure:
 
-Job Description:
-{job_description_text}
+        Desired Structure:
+        {desired_structure}
 
-CV:
-{cv_text}
+        Unstructured CV:
+        {raw_cv_text}
 
-Tailor the letter to the specific job requirements and showcase the candidate's match for the position. Mention specific accomplishments and quantify results whenever possible. Keep the tone professional and precise. The letter should be no more than 4 sentences. Avoid unnecessary adjectives and emotive language."""
-        cover_letter = self.cover_letter_gen.generate_cover_letter(cv_text, job_description_text, history=self.history)
-        self._add_to_history("user", cover_letter)
-        self._add_to_history("assistant", cover_letter)
-        return cover_letter
-
-    def _add_to_history(self, role, content):
+        Ensure the output is in JSON format and matches the desired structure exactly.
         """
-        Add a message to the conversation history.
+        response = self.llm_client.get_response(prompt, temperature=0.01)
+        return response.get("parsed_cv", {})
+
+    def generate_critique(self, cv_text, job_description_text):
+        """
+        Generate a critique and grade for the CV using the job description.
 
         Args:
-            role (str): The role of the message sender ('user' or 'assistant').
-            content (str): The content of the message.
-        """
-        self.history.append({"role": role, "content": content})
-
-    def improve_cover_letter(self, cv_text, cover_letter, job_description_text):
-        """
-        Perform iterative improvements on the cover letter based on critiques.
-
-        Args:
-            cv_text (str): The CV text.
-            cover_letter (str): The current cover letter text.
-            job_description_text (str): The job description text.
+            cv_text (str): The current CV text.
+            job_description_text (str): The job description.
 
         Returns:
-            str: The improved cover letter.
+            tuple: A critique string, grade, and structured critique dictionary.
         """
+        prompt = f"""
+        Evaluate the following CV based on its relevance to the job description, clarity, skills presentation, and professionalism.
+
+        Job Description:
+        {job_description_text}
+
+        CV:
+        {cv_text}
+
+        Provide a detailed critique in the following categories:
+        1. Relevance to the Job
+        2. Clarity and Structure
+        3. Skills Presentation
+        4. Professionalism
+        5. Overall Impression
+
+        Include a numerical grade (out of 10) for each category and an overall grade. Format the response as a JSON object.
+        """
+        response = self.llm_client.get_response(prompt, temperature=0.01)
+        critique = response.get("critique", "")
+        grade = response.get("overall_grade", 0)
+        grades_dict = response.get("grades", {})
+        return critique, grade, grades_dict
+
+    def improve_section(self, section, content, critique, job_description_text):
+        """
+        Improve a specific CV section based on LLM feedback.
+
+        Args:
+            section (str): The name of the section to improve.
+            content (str): The current content of the section.
+            critique (str): The critique for the section.
+            job_description_text (str): The job description.
+
+        Returns:
+            str: The improved section content.
+        """
+        prompt = f"""
+        Improve the {section} section of the CV based on the following critique and job description.
+
+        Section: {section}
+        Content:
+        {content}
+
+        Critique:
+        {critique}
+
+        Job Description:
+        {job_description_text}
+
+        Ensure the improved section is concise, professional, and adheres to the desired CV structure.
+        """
+        response = self.llm_client.get_response(prompt, temperature=0.01)
+        return response.get("improved_section", "")
+
+    def improve_cv(self, raw_cv, job_description_text, desired_structure = desired_structure_template):
+        """
+        Perform iterative improvements on the CV.
+
+        Args:
+            raw_cv (str): The raw CV text.
+            job_description_text (str): The job description.
+            desired_structure (dict): The desired structure for the CV.
+
+        Returns:
+            str: The final improved CV.
+        """
+        # Step 1: Parse the raw CV
+        structured_cv = self.parse_raw_cv(raw_cv, desired_structure)
+
+        # Step 2: Iteratively improve the CV
         total_reward = 0
         previous_grade = 0
 
         for iteration in range(self.max_iterations):
-            # Get critique and grade the current cover letter
-            critique, grade = self.cover_letter_gen.create_critique(
-                cover_letter, cv_text, job_description_text, history=self.history
-            )
-            total_reward += grade
-            self.grades.append(grade)
-            print(f"Iteration {iteration + 1}, Grade: {grade}, Cumulative Reward: {total_reward}")
-
-            # Add critique to history as a response from the assistant, not the user
-            self._add_to_history("assistant", critique)
-
-            # Check for early stopping if improvement is minimal
-            improvement = grade - previous_grade
-            if improvement < self.improvement_threshold:
-                print(f"No significant improvement, stopping early after iteration {iteration + 1}.")
-                break
-
-            # Check if satisfactory grade has been reached
-            if grade >= 9:
-                print("Achieved satisfactory grade.")
-                break
-
-            # Incorporate critique into the next improvement step
-            improvement_prompt = f"""
-                        Based on the provided job description, CV, original cover letter, and the critique, 
-                        improve the cover letter to address the weaknesses pointed out. Tailor the letter 
-                        to better match the job requirements and highlight the most relevant skills and 
-                        experience.
-
-                        Job Description:
-                        {job_description_text}
-
-                        CV:
-                        {cv_text}
-
-                        Original Cover Letter:
-                        {cover_letter}
-
-                        Critique:
-                        {critique}
-
-                        Keep the tone professional, concise, and focused on the strengths of the candidate.
-                        """
-
-            # Add user input for improvement prompt
-            self._add_to_history("user", improvement_prompt)
-
-            # Generate improved cover letter based on critique and prompt
-            cover_letter = self.cover_letter_gen.get_response(improvement_prompt, history=self.history)
-
-            # Add improved cover letter as an assistant response
-            self._add_to_history("assistant", cover_letter)
-
-            previous_grade = grade
-
-        return cover_letter, critique
-
-    def extract_relevant_critique(self, section, critique):
-        """
-        Map critique categories to the relevant CV sections and extract specific feedback.
-        """
-        critique_mapping = {
-            "Relevance to the Job": ["Summary", "Work Experience", "Projects"],
-            "Clarity and Structure": ["Summary", "Work Experience", "Skills", "Education", "Projects", "Publications"],
-            "Skills Presentation": ["Skills"],
-            "Professionalism": ["Summary", "Work Experience", "Projects"],
-            "Overall Impression": ["Summary"]
-        }
-
-        relevant_feedback = []
-        for category, sections in critique_mapping.items():
-            if section in sections and category in critique:
-                feedback = critique[category][0]  # Extract feedback text
-                relevant_feedback.append(f"{category}: {feedback}")
-
-        return "\n".join(relevant_feedback) if relevant_feedback else None
-
-    def parse_improved_section(self, section, improved_content):
-        """
-        Parse the improved section content and integrate it into the CV structure.
-        """
-        parsed_content = improved_content.split("\n")
-        return [line.strip() for line in parsed_content if line.strip()]
-
-    def improve_cv(self, original_cv, last_improved_cv, job_description_text, desired_structure):
-        # Parse original and last improved CVs
-        original_structured = parse_original_cv(original_cv, desired_structure)
-        last_improved_structured = parse_last_improved_cv(last_improved_cv, desired_structure)
-
-        # Combine CVs
-        combined_structured = combine_cvs(original_structured, last_improved_structured)
-
-        # Initialize iteration variables
-        total_reward = 0
-        previous_grade = 0
-        company_name_and_job_name = extract_company_name_and_job_name(job_description_text)
-        grades_df = pd.DataFrame(
-            columns=["iteration", "Relevance to the Job", "Clarity and Structure", "Skills Presentation",
-                     "Professionalism", "Overall"])
-
-        for iteration in range(self.max_iterations):
-            # Flatten combined CV for critique
-            combined_cv_flat = self.format_combined_cv(combined_structured)
+            # Format the current CV
+            combined_cv_flat = format_combined_cv_with_prompt(structured_cv)
 
             # Obtain critique and grade
-            critique, grade, grades_dict = self.cover_letter_gen.create_critique(
-                combined_cv_flat, original_cv, job_description_text, history=self.history
-            )
-
-            # Log grades
-            grades_df = pd.concat([grades_df, pd.DataFrame([{**{"iteration": iteration}, **grades_dict}])],
-                                  ignore_index=True)
+            critique, grade, grades_dict = self.generate_critique(combined_cv_flat, job_description_text)
             total_reward += grade
             self.grades.append(grade)
 
-            # Add critique to history
-            self._add_to_history("assistant", critique)
-
-            # Early stopping
+            # Early stopping conditions
             improvement = grade - previous_grade
-            if improvement < self.improvement_threshold:
-                print(f"No significant improvement. Stopping after iteration {iteration + 1}.")
+            if improvement < self.improvement_threshold or grade >= 9:
                 break
 
-            if grade >= 9:
-                print("Achieved satisfactory grade.")
-                break
-
-            # Modular improvement for each section
-            for section, content in combined_structured.items():
-                relevant_critique = self.extract_relevant_critique(section, critique)
+            # Improve individual sections
+            for section, content in structured_cv.items():
+                relevant_critique = critique.get(section, "")
                 if relevant_critique:
-                    improvement_prompt = f"""
-                    Improve the {section} section of the CV based on the critique provided. Focus on addressing the specific feedback below and aligning the section with the job description.
-
-                    Section: {section}
-                    Content:
-                    {content}
-
-                    Critique:
-                    {relevant_critique}
-
-                    Job Description:
-                    {job_description_text}
-
-                    Ensure the section aligns with the desired structure and highlights relevant skills, achievements, and professional tone effectively.
-                    """
-                    improved_section = self.cover_letter_gen.get_response(improvement_prompt, history=self.history)
-                    combined_structured[section] = self.parse_improved_section(section, improved_section)
+                    improved_section = self.improve_section(section, content, relevant_critique, job_description_text)
+                    structured_cv[section] = improved_section
 
             previous_grade = grade
 
-        # Final formatting
-        final_cv = self.format_combined_cv(combined_structured)
-        validation_critique = \
-        self.cover_letter_gen.create_critique(final_cv, original_cv, job_description_text, history=self.history)[0]
-        grades_df.to_csv(os.path.join("Output", "Grades", f"{company_name_and_job_name}_grades.csv"), index=False)
-
-        return final_cv, validation_critique
-
-
+        # Step 3: Final formatting
+        return format_combined_cv_with_prompt(structured_cv)

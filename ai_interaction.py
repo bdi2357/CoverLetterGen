@@ -357,6 +357,7 @@ class CVGenerator:
         Returns:
             tuple: A tuple containing the critique text and the overall grade.
         """
+        print(cv_content)
         prompt = f"""Provide a detailed critique of the following CV based on these criteria:
 
         1. **Relevance to the Job**  
@@ -391,8 +392,7 @@ class CVGenerator:
 
         **Inputs**:
 
-        **Original CV**:  
-        {original_cv}  
+          
 
         **Current CV Version**:  
         {cv_content}  
