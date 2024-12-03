@@ -1,6 +1,7 @@
 import pandas as pd
 import os
 import json
+from ExtractCompanyNameJob import extract_company_name_and_job_name
 from format_combined_cv_with_prompt import format_combined_cv_with_prompt
 desired_structure_template = {
     "Name" : [],
@@ -17,13 +18,13 @@ feedback_mapping = {
         "Skills Presentation": ["Skills"],
         "Clarity and Structure": ["Contact Information", "Summary", "Work Experience"],
         "Professionalism": ["Entire CV"],
-        "Overall Impression": ["Summary"]
+        "Overall": ["Summary"]
     }
 section_to_critique_mapping = {
     "Contact": ["Clarity and Structure", "Professionalism"],
-    "Summary": ["Relevance to the Job", "Clarity and Structure", "Skills Presentation", "Professionalism", "Overall Impression"],
-    "Skills": ["Clarity and Structure", "Professionalism", "Skills Presentation", "Relevance to the Job"],
-    "Experience": ["Clarity and Structure", "Professionalism", "Relevance to the Job"],
+    "Summary": ["Relevance to the Job", "Clarity and Structure", "Skills Presentation", "Professionalism", "Overall"],
+    "Skills": ["Clarity and Structure", "Professionalism", "Skills Presentation", "Relevance to the Job","Overall"],
+    "Experience": ["Clarity and Structure", "Skills Presentation", "Professionalism", "Relevance to the Job","Overall"],
     "Education": ["Clarity and Structure", "Professionalism"],
     "Projects": ["Clarity and Structure", "Professionalism", "Skills Presentation", "Relevance to the Job"],
     "Publications": ["Clarity and Structure"],
@@ -210,7 +211,7 @@ class ModularIterativeAgent:
         2. Clarity and Structure
         3. Skills Presentation
         4. Professionalism
-        5. Overall Impression
+        5. Overall
 
         Include a numerical grade (out of 10) for each category and an overall grade. 
         Format the response as a strict JSON that does not include the string json  object like this:
@@ -232,11 +233,11 @@ class ModularIterativeAgent:
             "grade": NUMBER,
             "critique": "TEXT"
           }},
-          "Overall Impression": {{
+          "Overall": {{
             "grade": NUMBER,
             "critique": "TEXT"
           }},
-          "Overall Grade": NUMBER
+          
         }}
         **IMPORTANT**: Ensure the output is a valid JSON object and does not include any extraneous text, such as ```json or '''json or json.
         """
@@ -261,8 +262,7 @@ class ModularIterativeAgent:
                 "Clarity and Structure": {"grade": 0, "critique": "Error parsing response."},
                 "Skills Presentation": {"grade": 0, "critique": "Error parsing response."},
                 "Professionalism": {"grade": 0, "critique": "Error parsing response."},
-                "Overall Impression": {"grade": 0, "critique": "Error parsing response."},
-                "Overall Grade": 0,
+                "Overall": {"grade": 0, "critique": "Error parsing response."}
             }
 
         # Extract critiques and grades
@@ -271,7 +271,7 @@ class ModularIterativeAgent:
             "Clarity and Structure": response_dict.get("Clarity and Structure", {}).get("critique", ""),
             "Skills Presentation": response_dict.get("Skills Presentation", {}).get("critique", ""),
             "Professionalism": response_dict.get("Professionalism", {}).get("critique", ""),
-            "Overall Impression": response_dict.get("Overall Impression", {}).get("critique", ""),
+            "Overall": response_dict.get("Overall", {}).get("critique", ""),
         }
         grade = response_dict.get("Overall Grade", 0)
         grades_dict = {
@@ -279,8 +279,7 @@ class ModularIterativeAgent:
             "Clarity and Structure": response_dict.get("Clarity and Structure", {}).get("grade", 0),
             "Skills Presentation": response_dict.get("Skills Presentation", {}).get("grade", 0),
             "Professionalism": response_dict.get("Professionalism", {}).get("grade", 0),
-            "Overall Impression": response_dict.get("Overall Impression", {}).get("grade", 0),
-            "Overall Grade": grade,
+            "Overall": response_dict.get("Overall", {}).get("grade", 0)
         }
 
         return critique, grade, grades_dict
@@ -352,10 +351,15 @@ class ModularIterativeAgent:
         # Step 1: Parse the raw CV
         cv_content = raw_cv #self.llm_client.generate_cv(raw_cv, job_description_text, raw_cv, history=None)
         structured_cv = self.parse_raw_cv(cv_content, desired_structure)
+        company_name_and_job_name = extract_company_name_and_job_name(job_description_text)
 
         # Step 2: Iteratively improve the CV
         total_reward = 0
         previous_grade = 0
+
+        grades_names = ["Relevance to the Job", "Clarity and Structure", "Skills Presentation",
+                        "Professionalism", "Overall"]
+        grades_df = pd.DataFrame(columns=['iteration'] + grades_names)
 
         for iteration in range(self.max_iterations):
             # Format the current CV
@@ -366,9 +370,19 @@ class ModularIterativeAgent:
             total_reward += grade
             self.grades.append(grade)
 
+            iteration_dict = {'iteration': iteration}
+
+            # Merge the dictionaries and convert to DataFrame
+            temp_df = pd.DataFrame({**iteration_dict, **grades_dict}, index=[0])
+
+            # Append to the main DataFrame
+            grades_df = pd.concat([grades_df, temp_df], ignore_index=True)
+
             # Early stopping conditions
             improvement = grade - previous_grade
             if improvement < self.improvement_threshold or grade >= 9:
+                grades_df.to_csv(os.path.join("Output", "Grades", company_name_and_job_name + "_grades.csv"),
+                                 index=False)
                 break
 
             # Improve individual sections
@@ -388,4 +402,5 @@ class ModularIterativeAgent:
             previous_grade = grade
 
         # Step 3: Final formatting
+        grades_df.to_csv(os.path.join("Output", "Grades", company_name_and_job_name + "_grades.csv"), index=False)
         return self.format_cv_with_prompt_using_llm(structured_cv), critique
