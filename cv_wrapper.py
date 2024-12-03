@@ -134,9 +134,9 @@ def wrapping_cv_generation(cv_file_path,job_description_text, output_dir,openai_
 if __name__ == "__main__":
     start = time.time()
     #cv_file_path = os.path.join("Data", 'CV_GPT_rev.pdf')
-    cv_file_path = os.path.join("Data","CV", 'CV_GPT_N3.pdf')
+    cv_file_path = os.path.join("Data","CV", 'CV_GPT_N4.pdf')
 
-    job_description_text_file_path = os.path.join("Data","JobDescriptions","Rise.txt")
+    job_description_text_file_path = os.path.join("Data","JobDescriptions","Intuit.txt")
 
     load_dotenv('.env', override=True)
     openai_api_key = os.getenv('OPENAI_API_KEY')
@@ -144,8 +144,8 @@ if __name__ == "__main__":
     template_path = os.path.join("Templates", "Final_Revised_Template_V2.docx")
     job_description_text = open(job_description_text_file_path,"r",encoding="utf-8").read()
     #print(job_description_text)
-    #wrapping_cv_generation(cv_file_path, job_description_text, output_dir, openai_api_key,template_path, "ModularIterativeAgent", "modular_iterative")
-    wrapping_cv_generation(cv_file_path, job_description_text, output_dir, openai_api_key, template_path,"BasicIterativeAgent", "basic_iterative")
+    wrapping_cv_generation(cv_file_path, job_description_text, output_dir, openai_api_key,template_path, "ModularIterativeAgent", "modular_iterative")
+    #wrapping_cv_generation(cv_file_path, job_description_text, output_dir, openai_api_key, template_path,"BasicIterativeAgent", "basic_iterative")
     # Set up OpenAI client
     """ 
     client = OpenAI(api_key=openai_api_key)

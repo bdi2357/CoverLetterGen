@@ -111,4 +111,6 @@ if __name__ == "__main__" :
 {job_description_text}
 
 Output the result in the specified format:""")
+    job_description_text = open("Data\JobDescriptions\Rise.txt","r").read()
+    #job_description_text = open("Data\JobDescriptions\Darrow.txt", "r").read()
     print(extract_company_name_and_job_name(job_description_text))

@@ -1,5 +1,5 @@
 from jinja2 import Template
-
+import json
 def parse_skills_section(skills_raw):
     """
     Parses a raw skills section into a dictionary format.
@@ -42,9 +42,9 @@ def format_combined_cv_with_prompt(structured_cv):
     prompt_template = """
 {{Name}}  
 Contact Information  
- Phone: {{Contact.Cellular}} | Email: {{Contact.Email}}  
- LinkedIn: {{LinkedIn}}{% if GitHub %}  
- GitHub: {{GitHub}}{% endif %}  
+ Phone: {{Contact.Phone}} | Email: {{Contact.Email}}  
+ LinkedIn: {{Contact.LinkedIn}}{% if Contact.GitHub %}  
+ GitHub: {{Contact.GitHub}}{% endif %}  
 
 Summary  
 {{Summary}}  
@@ -85,6 +85,7 @@ Publications
         # Load and render the template
         template = Template(prompt_template)
         formatted_cv = template.render(**structured_cv)
+        print(formatted_cv)
         return formatted_cv.strip()
     except Exception as e:
         return f"Error generating CV: {str(e)}"
@@ -144,3 +145,6 @@ if __name__ == "__main__":
     # Generate the CV
     formatted_cv = format_combined_cv_with_prompt(structured_cv_example)
     print(formatted_cv)
+
+
+

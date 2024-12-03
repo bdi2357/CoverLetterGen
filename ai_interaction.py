@@ -375,7 +375,6 @@ class CVGenerator:
            - Grade: **#Skills Presentation Grade: NUMBER##**  
            - Highlight strengths and areas for improvement in skills representation.
 
-
         4. **Professionalism**  
            - Is the CV professional in tone, free of errors, and written in clear language?  
            - Grade: **#Professionalism Grade: NUMBER##**  
@@ -383,16 +382,14 @@ class CVGenerator:
 
         5. **Overall Impression**  
            - How well does the CV present the candidate as a strong fit for the role?  
-           - Grade: **#Overall Grade: NUMBER##**  
+           - Grade: **#Overall Grade: NUMBER.#**  
            - Summarize key strengths and critical weaknesses.
 
         **Instructions**:  
-        - Ensure each grade follows the specified format **#Criterion Name Grade: NUMBER#**.  
-        - Provide Actionable Feedback, even if sections are sparse or incomplete.  
+        - Ensure each grade follows the specified format **#Criterion Name Grade: NUMBER##** for criteria grades, and **#Overall Grade: NUMBER.#** for the overall impression.  
+        - Provide actionable feedback, even if sections are sparse or incomplete.  
 
         **Inputs**:
-
-          
 
         **Current CV Version**:  
         {cv_content}  
@@ -400,7 +397,7 @@ class CVGenerator:
         **Job Description**:  
         {job_description_text}  
 
-        Ensure consistency and provide all grades using the required format. Keeping grades using the required format is very important"""
+        Ensure consistency and provide all grades using the required format. Keeping grades using the required format is very important."""
 
         response = self.ai_model.get_response(prompt, history=history,temperature= 0.01)
 
