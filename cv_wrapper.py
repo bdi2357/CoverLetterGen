@@ -102,12 +102,12 @@ def cv_content_generation(cv_file_path, job_description_text, llm_provider='open
 def wrapping_cv_generation(cv_file_path,job_description_text, output_dir,openai_api_key, template_path,agent_type='BasicIterativeAgent', agent_module='basic_iterative'):
     company_name_and_job_name = extract_company_name_and_job_name(job_description_text)
     sections_file_path = os.path.join("Output", "Sections",
-                                      company_name_and_job_name.replace(".", "_") + "_sections.txt")
+                                      company_name_and_job_name.replace(".", "_") + agent_type +"_sections.txt")
     critique_file_path = os.path.join("Output", "CritiqueFinal",
-                                      company_name_and_job_name.replace(".", "_") + "_crtitque.txt")
+                                      company_name_and_job_name.replace(".", "_") + agent_type + "_crtitque.txt")
     cv_content_final_file_path = os.path.join("Output", "CV_content",
-                                              company_name_and_job_name.replace(".", "_") + "_cv_content.txt")
-    dest_cv_path = os.path.join("Output", "CV","CV_"+company_name_and_job_name.replace(".", "_") )
+                                              company_name_and_job_name.replace(".", "_") + agent_type +"_cv_content.txt")
+    dest_cv_path = os.path.join("Output", "CV","CV_"+company_name_and_job_name.replace(".", "_")+"_"+agent_type )
     finalized_cv_content, citique_final = cv_content_generation(cv_file_path, job_description_text,
                                                                 llm_provider="openai",
                                                                 agent_type=agent_type, agent_module=agent_module)

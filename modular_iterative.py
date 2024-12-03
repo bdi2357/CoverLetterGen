@@ -367,6 +367,7 @@ class ModularIterativeAgent:
 
             # Obtain critique and grade
             critique, grade, grades_dict = self.generate_critique(combined_cv_flat, job_description_text)
+            #critique, grade, grades_dict = self.llm_client.create_critique(combined_cv_flat, raw_cv, job_description_text, history=self.history)
             total_reward += grade
             self.grades.append(grade)
 
@@ -381,7 +382,7 @@ class ModularIterativeAgent:
             # Early stopping conditions
             improvement = grade - previous_grade
             if improvement < self.improvement_threshold or grade >= 9:
-                grades_df.to_csv(os.path.join("Output", "Grades", company_name_and_job_name + "_grades.csv"),
+                grades_df.to_csv(os.path.join("Output", "Grades", company_name_and_job_name + "_ModularIterativeAgent_grades.csv"),
                                  index=False)
                 break
 
@@ -402,5 +403,5 @@ class ModularIterativeAgent:
             previous_grade = grade
 
         # Step 3: Final formatting
-        grades_df.to_csv(os.path.join("Output", "Grades", company_name_and_job_name + "_grades.csv"), index=False)
+        grades_df.to_csv(os.path.join("Output", "Grades", company_name_and_job_name + "_ModularIterativeAgent_grades.csv"), index=False)
         return self.format_cv_with_prompt_using_llm(structured_cv), critique
