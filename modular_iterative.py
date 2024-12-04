@@ -284,6 +284,62 @@ class ModularIterativeAgent:
 
         return critique, grade, grades_dict
 
+    def critique_to_json(self, critique_text):
+        """
+        Convert the critique text to a structured JSON format using LLM.
+
+        Args:
+            critique_text (str): The raw critique text containing grades and actionable feedback.
+
+        Returns:
+            dict: A structured dictionary with keys like 'Relevance to the Job', 'Clarity and Structure',
+                  'Skills Presentation', 'Professionalism', and 'Overall'.
+        """
+        prompt = f"""
+        Convert the following critique into a structured JSON format with the required keys and associated comments:
+
+        Critique Text:
+        {critique_text}
+
+        **Formatting Instructions**:
+        - Ensure the output is a JSON object with the following keys:
+          1. "Relevance to the Job": Include the critique text related to this category.
+          2. "Clarity and Structure": Include the critique text related to this category.
+          3. "Skills Presentation": Include the critique text related to this category.
+          4. "Professionalism": Include the critique text related to this category.
+          5. "Overall": Include the critique text related to this category.
+        - The JSON must have the exact keys as mentioned and no extraneous text or formatting such as '```json' or '```'.
+        - Keep the comments concise and accurate as described in the critique.
+
+        **Output Example**:
+        {{
+          "Relevance to the Job": "TEXT",
+          "Clarity and Structure": "TEXT",
+          "Skills Presentation": "TEXT",
+          "Professionalism": "TEXT",
+          "Overall": "TEXT"
+        }}
+        """
+        # Get the response from the LLM
+        response = self.llm_client.ai_model.get_response(prompt, temperature=0.01)
+
+        print("Raw response from LLM:")
+        print(response)
+
+        try:
+            # Parse the JSON response into a dictionary
+            response_dict = json.loads(response.strip())
+            return response_dict
+        except json.JSONDecodeError as e:
+            print(f"Error parsing critique response: {e}")
+            return {
+                "Relevance to the Job": "Error parsing response.",
+                "Clarity and Structure": "Error parsing response.",
+                "Skills Presentation": "Error parsing response.",
+                "Professionalism": "Error parsing response.",
+                "Overall": "Error parsing response."
+            }
+
     def improve_section(self, section, content, critique, job_description_text):
         """
         Improve a specific CV section based on LLM feedback.
@@ -366,8 +422,12 @@ class ModularIterativeAgent:
             combined_cv_flat = self.format_cv_with_prompt_using_llm(structured_cv)
 
             # Obtain critique and grade
-            critique, grade, grades_dict = self.generate_critique(combined_cv_flat, job_description_text)
-            #critique, grade, grades_dict = self.llm_client.create_critique(combined_cv_flat, raw_cv, job_description_text, history=self.history)
+            #critique, grade, grades_dict = self.generate_critique(combined_cv_flat, job_description_text)
+            critique_txt, grade, grades_dict = self.llm_client.create_critique(combined_cv_flat, raw_cv, job_description_text, history=self.history)
+            critique = self.critique_to_json(critique_txt)
+            print("generated crotoque modular iterative")
+            print("$"*100)
+            print(critique)
             total_reward += grade
             self.grades.append(grade)
 
