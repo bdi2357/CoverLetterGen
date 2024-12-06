@@ -120,25 +120,33 @@ class ResumeEvaluator:
         Returns:
             Tuple[str, Dict[str, float]]: A detailed evaluation and grades.
         """
-        vision_query = """
-        Please evaluate the visual aspects of this CV, including:
-        - Layout and structure
-        - Font consistency and size
-        - Visual hierarchy and readability
-        - Use of colors, lines, or separators
-        - Suitability for professional use
+        vision_query = """Evaluate the visual appeal of this CV with a focus on identifying the best design for professional purposes. Assess the following criteria:
 
-        Provide your response in the following structured format:
-        1. Detailed textual evaluation of each criterion.
-        2. A JSON object with numerical grades (0–10) for the following criteria:
-           - Layout and Structure
-           - Font Consistency and Size
-           - Visual Hierarchy and Readability
-           - Use of Colors, Lines, or Separators
-           - Suitability for Professional Use
+1. **Layout and Structure**: Is the content organized logically, with clear headers and well-defined sections? Are sections like Work Experience, Education, and Skills easy to locate?
 
-        Ensure all grades are numeric and included in the JSON object.
-        """
+2. **Font Consistency and Size**: Are fonts consistent across the document, including bullet points? Evaluate whether font sizes differentiate effectively between headers and body text, emphasizing important information like the name and section titles.
+
+3. **Visual Hierarchy and Readability**: How well does the design guide the reader's eye? Assess whether the use of bold text, spacing, and alignment makes critical information stand out while maintaining a clear flow.
+
+4. **Use of Colors, Lines, or Separators**: Are colors, lines, and separators used professionally and consistently? Highlight whether elements like shading or borders enhance the document's clarity and visual structure.
+
+5. **Suitability for Professional Use**: Does the design align with standards for the relevant industry, such as corporate, technical, or creative roles?
+
+6. **Overall Professionalism and Aesthetic Appeal**: Consider the overall balance of design elements, readability, and professionalism. Is the CV visually engaging without unnecessary complexity?
+
+### Output Requirements:
+1. Provide a **detailed textual evaluation** for each criterion, noting strengths and areas for improvement. Mention specific instances where issues like inconsistent font use, bullet formatting, or insufficient contrast arise.
+2. Return a JSON object with grades (0–10) for:
+   - Layout and Structure
+   - Font Consistency and Size
+   - Visual Hierarchy and Readability
+   - Use of Colors, Lines, or Separators
+   - Suitability for Professional Use
+   - Overall Professionalism and Aesthetic Appeal
+   - Overall Grade (average of the above scores)
+
+Focus on actionable feedback, such as whether shading and bold headers were used consistently or if additional 
+adjustments are needed to improve visual hierarchy and professionalism."""
         # Step 1: Extract the first page as an image
         first_page_image_path = self.extract_first_page_as_image(pdf_path)
 
@@ -245,8 +253,8 @@ if __name__ == "__main__":
 if __name__ == "__main__":
     query = "Describe this image to me in detail"
     url = os.path.join("Data","sunflower.jpg")
-    desc = question_image(url, query)
-    print(desc)
+    #desc = question_image(url, query)
+    #print(desc)
     # Load the OpenAI API key
     os.environ['OPENAI_API_KEY'] =os.getenv('OPENAI_API_KEY')
 
@@ -259,8 +267,10 @@ if __name__ == "__main__":
     # Path to the resume PDF
     #resume_pdf_path = "cv_Shira.pdf"
     #file_path = os.path.join("Output", "CV", "CV_Rise_DataScientist.pdf")
-    #file_path = os.path.join("Data", "CV", "cv_Shira.pdf")
-    file_path = os.path.join("Data", "CV","cv-David-Pal.pdf")
+    file_path = os.path.join("Data", "CV", "cv_Shira.pdf")
+    #file_path = os.path.join("Data", "CV","cv-David-Pal.pdf")
+    #file_path = os.path.join("Data", "CV","Neta Shoham - CV.pdf")
+
     # Evaluate the resume
     evaluation_text, grades = evaluator.evaluate_resume(file_path)
 
