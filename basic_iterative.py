@@ -118,7 +118,7 @@ Tailor the letter to the specific job requirements and showcase the candidate's 
             self._add_to_history("user", improvement_prompt)
 
             # Generate improved cover letter based on critique and prompt
-            cover_letter = self.cover_letter_gen.get_response(improvement_prompt, history=self.history)
+            cover_letter = self.cover_letter_gen.ai_model.get_response(improvement_prompt, history=self.history)
 
             # Add improved cover letter as an assistant response
             self._add_to_history("assistant", cover_letter)

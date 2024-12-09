@@ -57,7 +57,7 @@ def main(cv_file_path, job_description_text, llm_provider='openai', method='basi
 
 
 if __name__ == "__main__":
-    cv_file_path = os.path.join("Data", 'CV_GPT_rev.pdf')
+    cv_file_path = os.path.join("Data", 'CV' ,'CV_GPT_N5.pdf')
     job_description_text = """ We're seeking an AI Developer to join our team. In this role, you'll leverage artificial intelligence and machine learning techniques to improve the invoice reconciliation process and create a unified data format across various financial systems.
 
     Responsibilities:
