@@ -11,7 +11,7 @@ from parsing_cv_to_dict import CVParserAI
 load_dotenv('.env', override=True)
 from openai import OpenAI
 from doc_from_template import generate_cv
-def main(cv_file_path, job_description_text, llm_provider='openai', method='basic'):
+def wrap_cove_letter_generation(cv_file_path, job_description_text, llm_provider='openai', method='basic'):
     # Load API key securely
     api_key = os.getenv('OPENAI_API_KEY')
     if not api_key:
@@ -91,7 +91,7 @@ if __name__ == "__main__":
 
     """
     # Run with basic iterative method
-    main(cv_file_path, job_description_text, method='basic')
+    wrap_cove_letter_generation(cv_file_path, job_description_text, method='basic')
     """
     # Run with actor-critic method
     main(cv_file_path, job_description_text, method='actor_critic')
