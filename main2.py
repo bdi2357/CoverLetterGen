@@ -7,9 +7,9 @@ from basic_iterative import BasicIterativeAgent  # Import BasicIterativeAgent
 from data_handling import load_and_extract_text, extract_applicant_name
 from utilities import create_pdf
 from dotenv import load_dotenv
-
+from parsing_cv_to_dict import CVParserAI
 load_dotenv('.env', override=True)
-
+from openai import OpenAI
 def main(cv_file_path, job_description_text, llm_provider='openai', method='basic'):
     # Load API key securely
     api_key = os.getenv('OPENAI_API_KEY')
@@ -23,6 +23,7 @@ def main(cv_file_path, job_description_text, llm_provider='openai', method='basi
         raise ValueError(f"Unsupported LLM providerh: {llm_provider}")
 
     # Initialize CoverLetterGenerator
+    parser = CVParserAI(OpenAI())
     cover_letter_gen = CoverLetterGenerator(ai_model)
 
     # Initialize the method-agnostic agent
@@ -50,6 +51,10 @@ def main(cv_file_path, job_description_text, llm_provider='openai', method='basi
     print(improved_cover_letter)
     print("Critique of the Final Cover Letter")
     print(last_critique)
+
+
+    sections_cover_letter = parser.parse_cv_and_cover_letter_to_dict(cv_text, cover_letter)
+    print(sections_cover_letter)
     # Create a PDF of the final cover letter
     output_pdf_path = "Output/cover_letter.pdf"
     create_pdf(output_pdf_path, applicant_name, improved_cover_letter)

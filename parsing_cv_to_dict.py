@@ -195,6 +195,59 @@ class CVParserAI:
             logging.error("No response received from the model.")
             return {}
 
+    def parse_cv_and_cover_letter_to_dict(self, cv_content, cover_letter):
+        """
+        Parses both the CV content and the Cover Letter into the desired JSON structure.
+
+        Args:
+            cv_content (str): The full text of the CV.
+            cover_letter (str): The full text of the Cover Letter.
+
+        Returns:
+            dict: A dictionary with the structured content of the CV and Cover Letter.
+        """
+        prompt = f"""
+        Here is a CV document:
+
+        {cv_content}
+
+        Here is the Cover Letter text:
+
+        {cover_letter}
+
+        Organize this content into a JSON structure that complies with the following template:
+
+        {{
+            "Name": "Name of the individual",
+            "Contact": {{
+                "Cellular": "Phone number",
+                "Email": "Email address"
+            }},
+            "LinkedIn": "LinkedIn profile link",
+            "GitHub": "GitHub profile link (if available)",
+            "CoverLetter": "Cover letter text"
+        }}
+
+        Strictly return the response in valid JSON format, without additional text or explanation.
+        """
+
+        response = self.get_response(prompt, temperature=0.01)
+        if response:
+            sanitized_response = self.sanitize_response(response)
+            try:
+                parsed_response = json.loads(sanitized_response)
+                if isinstance(parsed_response, dict):
+                    return parsed_response
+                else:
+                    logging.warning("Response is not a valid dictionary.")
+                    return {}
+            except json.JSONDecodeError as e:
+                logging.error(f"JSON parsing error: {e}")
+                return {}
+        else:
+            logging.error("No response received from the model.")
+            return {}
+
 
 # Example usage
 if __name__ == "__main__":
