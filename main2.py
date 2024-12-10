@@ -56,11 +56,13 @@ def main(cv_file_path, job_description_text, llm_provider='openai', method='basi
 
     sections_cover_letter = parser.parse_cv_and_cover_letter_to_dict(cv_text, cover_letter)
     print(sections_cover_letter)
-    generate_cv()
+    output_path = os.path.join("Output","CoverLetter","CoverLetterTest")
+    template_cover_letter_path = os.path.join("Templates","StylishCoverLetter.docx")
+    generate_cv(output_path,sections_cover_letter,template_cover_letter_path)
     # Create a PDF of the final cover letter
-    output_pdf_path = "Output/cover_letter.pdf"
-    create_pdf(output_pdf_path, applicant_name, improved_cover_letter)
-    print(f"Cover letter saved to {output_pdf_path}")
+    #output_pdf_path = "Output/cover_letter.pdf"
+    #create_pdf(output_pdf_path, applicant_name, improved_cover_letter)
+    #print(f"Cover letter saved to {output_pdf_path}")
 
 
 if __name__ == "__main__":
