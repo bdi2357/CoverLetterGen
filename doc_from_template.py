@@ -293,4 +293,8 @@ if __name__ == "__main__":
     dest_cv_path = os.path.join("Output", "CV", "CV_Start_io_DataScientist")
     sections2cv(template_path, sections_path, dest_cv_path)
 
+    sections_cover_letter = {'Name': 'Itay Ben-Dan', 'Contact': {'Cellular': '+972544539284', 'Email': 'itaybd@gmail.com'}, 'LinkedIn': 'https://www.linkedin.com/in/itay-ben-dan-99b6041a/', 'GitHub': 'https://github.com/BDI2357', 'CoverLetter': 'Dear Hiring Manager,\n\nAs a Machine Learning and Data Science Consultant with a strong background in AI applications for the finance industry, I have developed advanced models, such as a financial transaction analysis system using large language models, to automate and optimize complex processes. My proficiency in Python, TensorFlow, and NLP techniques, combined with experience in unifying data across various sources, aligns well with your requirement for automating invoice reconciliation. I am eager to contribute my skills in building intelligent systems and improving financial workflows at your company during UK working hours.\n\nBest regards,\nItay Ben-Dan'}
+    dest_cover_letter_path = os.path.join("Output", "CoverLetter", "CoverLetterTest")
+    template_path = os.path.join("Templates", "StylishCoverLetter.docx")
+    generate_cv(dest_cover_letter_path,sections_cover_letter,template_path)
 
