@@ -11,20 +11,13 @@ from parsing_cv_to_dict import CVParserAI
 load_dotenv('.env', override=True)
 from openai import OpenAI
 from doc_from_template import generate_cv
-def wrap_cove_letter_generation(cv_file_path, job_description_text, llm_provider='openai', method='basic'):
-    # Load API key securely
-    api_key = os.getenv('OPENAI_API_KEY')
-    if not api_key:
-        raise ValueError("API key not found. Please set the appropriate environment variable.")
+def wrap_cove_letter_generation(cv_file_path, job_description_text, ai_model,parser, method='basic'):
+
 
     # Initialize the appropriate AI model based on the llm_provider argument
-    if llm_provider == 'openai':
-        ai_model = OpenAIModel(api_key=api_key, model_name='gpt-4o')
-    else:
-        raise ValueError(f"Unsupported LLM providerh: {llm_provider}")
 
     # Initialize CoverLetterGenerator
-    parser = CVParserAI(OpenAI())
+
     cover_letter_gen = CoverLetterGenerator(ai_model)
 
     # Initialize the method-agnostic agent
@@ -66,6 +59,11 @@ def wrap_cove_letter_generation(cv_file_path, job_description_text, llm_provider
 
 
 if __name__ == "__main__":
+    #Load API key securely
+    api_key = os.getenv('OPENAI_API_KEY')
+    if not api_key:
+        raise ValueError("API key not found. Please set the appropriate environment variable.")
+    ai_model = OpenAIModel(api_key=api_key, model_name='gpt-4o')
     cv_file_path = os.path.join("Data", 'CV' ,'CV_GPT_N5.pdf')
     job_description_text = """ We're seeking an AI Developer to join our team. In this role, you'll leverage artificial intelligence and machine learning techniques to improve the invoice reconciliation process and create a unified data format across various financial systems.
 
@@ -91,7 +89,8 @@ if __name__ == "__main__":
 
     """
     # Run with basic iterative method
-    wrap_cove_letter_generation(cv_file_path, job_description_text, method='basic')
+    parser = CVParserAI(OpenAI())
+    wrap_cove_letter_generation(cv_file_path, job_description_text,ai_model,parser, method='basic')
     """
     # Run with actor-critic method
     main(cv_file_path, job_description_text, method='actor_critic')

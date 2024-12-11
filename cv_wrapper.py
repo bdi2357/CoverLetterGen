@@ -136,7 +136,7 @@ if __name__ == "__main__":
     #cv_file_path = os.path.join("Data", 'CV_GPT_rev.pdf')
     cv_file_path = os.path.join("Data","CV", 'CV_GPT_N5.pdf')
 
-    job_description_text_file_path = os.path.join("Data","JobDescriptions","Intuit.txt")
+    job_description_text_file_path = os.path.join("Data","JobDescriptions","Outlier.txt")
 
     load_dotenv('.env', override=True)
     openai_api_key = os.getenv('OPENAI_API_KEY')
