@@ -7,11 +7,11 @@ from dotenv import load_dotenv
 import random
 
 #Get the OpenAI API key from the .env file
-load_dotenv('.env', override=True)
-openai_api_key = os.getenv('OPENAI_API_KEY')
+#load_dotenv('.env', override=True)
+#openai_api_key = os.getenv('OPENAI_API_KEY')
 
 # Set up the OpenAI client
-client = OpenAI(api_key=openai_api_key)
+
 
 
 def print_llm_response(prompt):
@@ -22,7 +22,7 @@ def print_llm_response(prompt):
     print(llm_response)
 
 
-def get_llm_response(prompt):
+def get_llm_response(prompt,api_key):
     """This function takes as input a prompt, which must be a string enclosed in quotation marks,
     and passes it to OpenAI's GPT3.5 model. The function then saves the response of the model as
     a string.
@@ -30,6 +30,7 @@ def get_llm_response(prompt):
     try:
         if not isinstance(prompt, str):
             raise ValueError("Input must be a string enclosed in quotes.")
+        client = OpenAI(api_key=api_key)
         completion = client.chat.completions.create(
             model="gpt-3.5-turbo-0125",
             messages=[
@@ -64,14 +65,14 @@ def get_chat_completion(prompt, history):
     response = completion.choices[0].message.content
     return response
 
-def extract_company_name_and_job_name(job_description_text):
+def extract_company_name_and_job_name(job_description_text,api_key):
     return get_llm_response(f"""Given the following job description, extract and return the company name and job title in the format CompanyName_JobName that is each there will be no spaces between the Words in the words in the
     CompanyName and the JobName, In the JobName each word will be the first Letter in upper case and the rest in lower case for example data scientist  will be written as DataScientist.
     if the company name is ABC and the job is data scientist the result should return ABC_DataScientist
 
 {job_description_text}
 
-Output the result in the specified format:""")
+Output the result in the specified format:""",api_key)
 
 
 if __name__ == "__main__" :

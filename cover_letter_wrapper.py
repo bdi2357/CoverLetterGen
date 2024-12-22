@@ -12,6 +12,7 @@ load_dotenv('.env', override=True)
 from openai import OpenAI
 from doc_from_template import generate_cv
 from parse_critique_to_dict import parse_cover_letter_critique_to_dict
+from ExtractCompanyNameJob import extract_company_name_and_job_name
 def wrap_cove_letter_generation(cv_file_path, job_description_text, ai_model,parser, method='basic'):
 
 
@@ -50,11 +51,15 @@ def wrap_cove_letter_generation(cv_file_path, job_description_text, ai_model,par
 
     sections_cover_letter = parser.parse_cv_and_cover_letter_to_dict(cv_text, cover_letter)
     sections_critique = parse_cover_letter_critique_to_dict(last_critique,"","")
+
+    company_name_and_job_name = extract_company_name_and_job_name(job_description_text,ai_model.api_key)
+    #sections_cover_letter["title"] = company_name_and_job_name
     print(sections_cover_letter)
     output_path = os.path.join("Output","CoverLetter","CoverLetterTest")
     output_criqique_path = os.path.join("Output", "CoverLetter", "CoverLetterCritiqueTest")
     template_cover_letter_path = os.path.join("Templates","StylishCoverLetter.docx")
     generate_cv(output_path,sections_cover_letter,template_cover_letter_path)
+    sections_critique["title"] = company_name_and_job_name
     template_cover_letter_critique_path = os.path.join("Templates","Critique_Template_n1.docx")
     generate_cv(output_criqique_path,sections_critique,template_cover_letter_critique_path)
     # Create a PDF of the final cover letter

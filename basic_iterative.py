@@ -143,7 +143,7 @@ Tailor the letter to the specific job requirements and showcase the candidate's 
         """
         total_reward = 0
         previous_grade = 0
-        company_name_and_job_name = extract_company_name_and_job_name(job_description_text)
+        company_name_and_job_name = extract_company_name_and_job_name(job_description_text,self.cover_letter_gen.ai_model.api_key)
         # Combine initial CV sections
         cv_content = self.cover_letter_gen.generate_cv(original_cv, job_description_text, original_cv, history=None)
         grades_names = ["Relevance to the Job", "Clarity and Structure","Skills Presentation",

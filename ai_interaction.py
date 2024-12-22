@@ -90,6 +90,7 @@ class OpenAIModel(LLMModel):
             model_name (str): The model to use, default is 'gpt-3.5-turbo'.
         """
         import openai
+        self.api_key = api_key
         self.client = openai.OpenAI(api_key=api_key)
         self.model_name = model_name
 
