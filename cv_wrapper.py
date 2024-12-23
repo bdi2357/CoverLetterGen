@@ -73,7 +73,7 @@ def cv_content_generation(cv_file_path, job_description_text, llm_provider='open
     cv_text = load_and_extract_text(cv_file_path)
 
     # Use extract_information_from_cv to get structured data from CV text
-    cv_data = extract_information_from_cv(cv_text)
+    cv_data = extract_information_from_cv(cv_text,api_key)
     personal_info = cv_data.get('Full name', '') + ", " + cv_data.get('Email', '')
     job_history = cv_data.get('Professional Summary', 'No job history found')
     skills = cv_data.get('Key skills', '')

@@ -4,19 +4,20 @@ from dotenv import load_dotenv
 from data_handling import load_and_extract_text
 # Load environment variables from .env file
 load_dotenv('.env', override=True)
-openai_api_key = os.getenv('OPENAI_API_KEY')
+#openai_api_key = os.getenv('OPENAI_API_KEY')
 
 # Set up the OpenAI client
-client = OpenAI(api_key=openai_api_key)
+#client = OpenAI(api_key=openai_api_key)
 
 
-def get_llm_response(prompt):
+def get_llm_response(prompt,api_key):
     """
     Function to get a response from OpenAI GPT model using the provided prompt.
     """
     try:
         if not isinstance(prompt, str):
             raise ValueError("Input must be a string enclosed in quotes.")
+        client = OpenAI(api_key=api_key)
         completion = client.chat.completions.create(
             model="gpt-4o",
             messages=[
@@ -35,7 +36,7 @@ def get_llm_response(prompt):
         return None
 
 
-def extract_information_from_cv(cv_text):
+def extract_information_from_cv(cv_text,api_key):
     """
     Extracts applicant's name, email, phone, address, GitHub, LinkedIn, and skills from the provided CV text.
 
@@ -64,7 +65,7 @@ def extract_information_from_cv(cv_text):
     \"{cv_text}\"
     """
 
-    response = get_llm_response(prompt)
+    response = get_llm_response(prompt,api_key)
 
     if response:
         # Parse the response into a dictionary (assume that the GPT response is structured)
