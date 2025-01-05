@@ -97,23 +97,29 @@ def parse_extracted_info(response):
             key_value = line.split(":")
             if len(key_value) == 2:
                 key, value = key_value[0].strip(), key_value[1].strip()
+                print("value :",value , type(value))
+                if isinstance(value,str) and value[0] == "\"" and value[-1] == "\"" :
+                    print("HERE VAL")
+                    value = value[1:-1]
+
                 info_dict[key] = value
 
     return info_dict
 
 
-def extract_and_print_cv_info(cv_text):
+def extract_and_print_cv_info(cv_text,api_key):
     """
     Extracts information from the CV and prints it in a readable format.
 
     Args:
         cv_text (str): The full text of the CV.
     """
-    info = extract_information_from_cv(cv_text)
+    info = extract_information_from_cv(cv_text,api_key)
 
     # Print the extracted information
     print("Extracted Information:")
     for key, value in info.items():
+        print("key","val")
         print(f"{key}: {value}")
 
 
@@ -129,9 +135,9 @@ if __name__ == "__main__":
     GitHub: github.com/itaybendan
     Professional Summary...
     """
-
+    openai_api_key = os.getenv('OPENAI_API_KEY')
     # Extract and print the CV information
     #extract_and_print_cv_info(sample_cv_text)
-    sample_pdf_path = os.path.join("Data", 'CV_GPT_N.pdf')
+    sample_pdf_path = os.path.join("Data",'CV' ,'CV_GPT_N5.pdf')
     original_cv = load_and_extract_text(sample_pdf_path)
-    extract_and_print_cv_info(original_cv)
+    extract_and_print_cv_info(original_cv,openai_api_key)

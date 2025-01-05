@@ -13,7 +13,8 @@ from dotenv import load_dotenv
 from openai import OpenAI
 from ExtractCompanyNameJob import extract_company_name_and_job_name
 from doc_from_template import sections2cv
-
+from parse_critique_to_dict import parse_cv_critique_to_dict
+from doc_from_template import generate_cv
 """
 def cv_content_generation(cv_file_path, job_description_text, llm_provider='openai'):
     # Load API key securely
@@ -74,10 +75,15 @@ def cv_content_generation(cv_file_path, job_description_text, llm_provider='open
 
     # Use extract_information_from_cv to get structured data from CV text
     cv_data = extract_information_from_cv(cv_text,api_key)
-    personal_info = cv_data.get('Full name', '') + ", " + cv_data.get('Email', '')
-    job_history = cv_data.get('Professional Summary', 'No job history found')
-    skills = cv_data.get('Key skills', '')
 
+    cv_data = {key.strip('"'): value.strip('"') if isinstance(value, str) else value for key, value in cv_data.items()}
+
+    #personal_info = cv_data.get('Full name', '') + ", " + cv_data.get('Email', '')
+    #job_history = cv_data.get('Professional Summary', 'No job history found')
+    #skills = cv_data.get('Key skills', '')
+    print(cv_data)
+    print(cv_data['Full name'])
+    print("#$"*44)
     # Dynamically load the agent class from the specified module
     try:
         agent_module_obj = importlib.import_module(agent_module)
@@ -97,7 +103,7 @@ def cv_content_generation(cv_file_path, job_description_text, llm_provider='open
     print(generated_cv)
     print("\nFinal Critique:")
     print(final_critique)
-    return generated_cv, final_critique
+    return generated_cv, final_critique, cv_data
 
 def wrapping_cv_generation(cv_file_path,job_description_text, output_dir,openai_api_key, template_path,agent_type='BasicIterativeAgent', agent_module='basic_iterative'):
     company_name_and_job_name = extract_company_name_and_job_name(job_description_text, openai_api_key)
@@ -108,7 +114,7 @@ def wrapping_cv_generation(cv_file_path,job_description_text, output_dir,openai_
     cv_content_final_file_path = os.path.join("Output", "CV_content",
                                               company_name_and_job_name.replace(".", "_") + agent_type +"_cv_content.txt")
     dest_cv_path = os.path.join("Output", "CV","CV_"+company_name_and_job_name.replace(".", "_")+"_"+agent_type )
-    finalized_cv_content, citique_final = cv_content_generation(cv_file_path, job_description_text,
+    finalized_cv_content, critique_final, cv_data = cv_content_generation(cv_file_path, job_description_text,
                                                                 llm_provider="openai",
                                                                 agent_type=agent_type, agent_module=agent_module)
     client = OpenAI(api_key=openai_api_key)
@@ -118,15 +124,20 @@ def wrapping_cv_generation(cv_file_path,job_description_text, output_dir,openai_
     sections = parser.parse_cv_sections(finalized_cv_content)
     save_cv_sections_to_file(sections, sections_file_path)
     # generate_cv_document(file_name, finalized_cv_content)
+    sections_critique = parse_cv_critique_to_dict(critique_final , "cv_critique" + company_name_and_job_name, cv_data["Full name"])
 
     print(f"Generated CV saved to {sections}")
     with open(critique_file_path, "w", encoding="utf-8") as f:
-        f.write(f"{citique_final}:\n")
+        f.write(f"{critique_final}:\n")
     with open(cv_content_final_file_path, "w", encoding="utf-8") as f:
         f.write(f"{finalized_cv_content}:\n")
-
+    sections_critique["TotalGrade"] = [float(section["Grade"]) for section in sections_critique['sections'] if section['Title'].find('Overall Impression')>-1][0]
+    template_cv_critique_path = os.path.join("Templates", "Critique_CV_Template.docx")
     print(load_cv_sections_from_file(sections_file_path))
     sections2cv(template_path, sections_file_path, dest_cv_path)
+    print(sections_critique)
+    output_criqique_path = os.path.join("Output", "CV", "CVCritiqueTest")
+    generate_cv(output_criqique_path, sections_critique, template_cv_critique_path)
     print("total time %0.2f" % (time.time() - start))
 
 
@@ -136,7 +147,7 @@ if __name__ == "__main__":
     #cv_file_path = os.path.join("Data", 'CV_GPT_rev.pdf')
     cv_file_path = os.path.join("Data","CV", 'CV_GPT_N5.pdf')
 
-    job_description_text_file_path = os.path.join("Data","JobDescriptions","Outlier.txt")
+    job_description_text_file_path = os.path.join("Data","JobDescriptions","Acculine.txt")
 
     load_dotenv('.env', override=True)
     openai_api_key = os.getenv('OPENAI_API_KEY')
