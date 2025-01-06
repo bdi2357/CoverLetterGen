@@ -8,6 +8,8 @@ from modular_iterative import ModularIterativeAgent
 from cv_info_extractor import extract_information_from_cv
 from docx_generate import generate_cv_document, save_cv_sections_to_file, extract_cv_sections,load_cv_sections_from_file
 import time
+import logging
+
 from parsing_cv_to_dict import CVParserAI
 from dotenv import load_dotenv
 from openai import OpenAI
@@ -55,6 +57,39 @@ def cv_content_generation(cv_file_path, job_description_text, llm_provider='open
 """
 import importlib
 
+
+def get_response(client, prompt, history=None, temperature=0.01,model_name="gpt-4o-mini"):
+    """
+    Get the response from the OpenAI model for the given prompt.
+
+    Args:
+        client : client
+        prompt (str): The prompt to send to the model.
+        history (list): A list of previous messages (dictionaries with 'role' and 'content').
+        temperature (float): The temperature for response randomness.
+
+    Returns:
+        str: The response from the model.
+    """
+    messages = [
+        {"role": "system", "content": "You are a helpful but terse AI assistant who gets straight to the point."}
+    ]
+    if history:
+        messages.extend(history)
+
+    messages.append({"role": "user", "content": prompt})
+
+    try:
+        completion = client.chat.completions.create(
+            model= model_name,
+            messages=messages,
+            temperature=temperature
+        )
+        response = completion.choices[0].message.content.strip()
+        return response
+    except Exception as e:
+        logging.error(f"An error occurred: {e}")
+        return None
 def cv_content_generation(cv_file_path, job_description_text, llm_provider='openai', agent_type='BasicIterativeAgent', agent_module='basic_iterative'):
     # Load API key securely
     api_key = os.getenv('OPENAI_API_KEY')
@@ -105,6 +140,43 @@ def cv_content_generation(cv_file_path, job_description_text, llm_provider='open
     print(final_critique)
     return generated_cv, final_critique, cv_data
 
+def create_final_verdict_prompt(sections_critique):
+    """
+    Generates a prompt to create a final verdict for a CV critique based on input sections.
+
+    Parameters:
+        sections_critique (dict): A dictionary containing critique sections, including grades and content.
+
+    Returns:
+        str: A formatted prompt for generating the final verdict.
+    """
+    prompt = f"""
+You are a professional CV reviewer. Based on the provided critique sections, create a **Final Verdict** for the candidate's CV. The final verdict should include:
+1. **Grade**: Calculate the overall grade as the average of the grades from all sections.
+2. **Strengths**: Summarize the key strengths across all sections, focusing on the most impactful aspects.
+3. **Areas for Improvement**: Highlight the main weaknesses or areas for refinement.
+4. **Next Steps**: Provide actionable suggestions to help the candidate improve their CV and make it more aligned with the job role.
+
+Here is the input data:
+
+{sections_critique}
+
+Format the output in the following structure:
+Final Verdict
+
+Grade: [Overall Grade]
+
+[Summary of Strengths]
+
+[Summary of Weaknesses]
+
+[Actionable Suggestions or Next Steps]
+
+vbnet
+Copy code
+"""
+    return prompt
+
 def wrapping_cv_generation(cv_file_path,job_description_text, output_dir,openai_api_key, template_path,agent_type='BasicIterativeAgent', agent_module='basic_iterative'):
     company_name_and_job_name = extract_company_name_and_job_name(job_description_text, openai_api_key)
     sections_file_path = os.path.join("Output", "Sections",
@@ -135,9 +207,13 @@ def wrapping_cv_generation(cv_file_path,job_description_text, output_dir,openai_
     template_cv_critique_path = os.path.join("Templates", "Critique_CV_Template.docx")
     print(load_cv_sections_from_file(sections_file_path))
     sections2cv(template_path, sections_file_path, dest_cv_path)
-    print(sections_critique)
+
+    final_verdict_prompt = create_final_verdict_prompt(sections_critique)
+    final_verdict = get_response(client, final_verdict_prompt)
+    sections_critique["final_verdict"] = final_verdict
     output_criqique_path = os.path.join("Output", "CV", "CVCritiqueTest")
     generate_cv(output_criqique_path, sections_critique, template_cv_critique_path)
+    print(sections_critique)
     print("total time %0.2f" % (time.time() - start))
 
 
