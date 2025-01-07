@@ -241,15 +241,16 @@ def wrapping_cv_generation(cv_file_path,job_description_text, output_dir,openai_
     with open(cv_content_final_file_path, "w", encoding="utf-8") as f:
         f.write(f"{finalized_cv_content}:\n")
     print(sections_critique)
-    sections_critique["TotalGrade"] = [float(section["Grade"]) for section in sections_critique['sections'] if section['Title'].find('Overall Impression')>-1][0]
-    template_cv_critique_path = os.path.join("Templates", "Critique_CV_Template.docx")
+    sections_critique["FinalGrade"] = [float(section["Grade"]) for section in sections_critique['sections'] if section['Title'].find('Overall Impression')>-1][0]
+    template_cv_critique_path = os.path.join("Templates", "Critique_CV_Template_v2.docx")
     print(load_cv_sections_from_file(sections_file_path))
     sections2cv(template_path, sections_file_path, dest_cv_path)
 
     final_verdict_prompt = create_final_verdict_prompt_v2(sections_critique)
     final_verdict = get_response(client, final_verdict_prompt)
     sections_critique["final_verdict"] = final_verdict
-    output_criqique_path = os.path.join("Output", "CV", "CVCritiqueTest")
+    output_criqique_path = os.path.join("Output", "CV", "CVCritiqueTest2")
+    #sections_critique["FinalGrade "] = sections_critique.pop()
     generate_cv(output_criqique_path, sections_critique, template_cv_critique_path)
     print(sections_critique)
     print("total time %0.2f" % (time.time() - start))
