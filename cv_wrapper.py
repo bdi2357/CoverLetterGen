@@ -176,7 +176,44 @@ vbnet
 Copy code
 """
     return prompt
+def create_final_verdict_prompt_v2(sections_critique):
+    """
+    Generates a prompt to create a structured final verdict for a CV critique based on input sections.
 
+    Parameters:
+        sections_critique (dict): A dictionary containing critique sections, including grades and content.
+
+    Returns:
+        str: A formatted prompt for generating the structured final verdict.
+    """
+    prompt = f"""
+You are a professional CV reviewer. Based on the provided critique sections, create a **Final Verdict** for the candidate's CV.
+Format the result as a dictionary with the following structure:
+- "Grade": A number representing the overall grade (average of all section grades).
+- "Strengths": A list of strings summarizing the key strengths across all sections.
+- "Areas for Improvement": A list of strings summarizing the main weaknesses or areas for refinement.
+- "Next Steps": A list of actionable suggestions to help the candidate improve their CV.
+
+Here is the input data:
+
+{sections_critique}
+
+Ensure the dictionary format is valid and follows this example structure:
+{{ 
+    "Grade": 8.8, 
+    "Strengths": [ 
+        "Strong alignment with the VP Data Science role, particularly in ML/DL and health tech.", 
+        "Well-organized CV with clear sections and logical flow." 
+    ], 
+    "Areas for Improvement": [ 
+        "Need for more emphasis on specific leadership roles and team management." 
+    ], 
+    "Next Steps": [ 
+        "Explicitly mention leadership roles and team management experience in the work experience section." 
+    ] 
+}}
+"""
+    return prompt
 def wrapping_cv_generation(cv_file_path,job_description_text, output_dir,openai_api_key, template_path,agent_type='BasicIterativeAgent', agent_module='basic_iterative'):
     company_name_and_job_name = extract_company_name_and_job_name(job_description_text, openai_api_key)
     sections_file_path = os.path.join("Output", "Sections",
@@ -203,12 +240,13 @@ def wrapping_cv_generation(cv_file_path,job_description_text, output_dir,openai_
         f.write(f"{critique_final}:\n")
     with open(cv_content_final_file_path, "w", encoding="utf-8") as f:
         f.write(f"{finalized_cv_content}:\n")
+    print(sections_critique)
     sections_critique["TotalGrade"] = [float(section["Grade"]) for section in sections_critique['sections'] if section['Title'].find('Overall Impression')>-1][0]
     template_cv_critique_path = os.path.join("Templates", "Critique_CV_Template.docx")
     print(load_cv_sections_from_file(sections_file_path))
     sections2cv(template_path, sections_file_path, dest_cv_path)
 
-    final_verdict_prompt = create_final_verdict_prompt(sections_critique)
+    final_verdict_prompt = create_final_verdict_prompt_v2(sections_critique)
     final_verdict = get_response(client, final_verdict_prompt)
     sections_critique["final_verdict"] = final_verdict
     output_criqique_path = os.path.join("Output", "CV", "CVCritiqueTest")
@@ -234,6 +272,7 @@ if __name__ == "__main__":
     #wrapping_cv_generation(cv_file_path, job_description_text, output_dir, openai_api_key,template_path, "ModularIterativeAgent", "modular_iterative")
     wrapping_cv_generation(cv_file_path, job_description_text, output_dir, openai_api_key, template_path,"BasicIterativeAgent", "basic_iterative")
     # Set up OpenAI client
+    print("Total time : %0.2f" %(time.time() -start))
     """ 
     client = OpenAI(api_key=openai_api_key)
 
