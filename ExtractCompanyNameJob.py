@@ -66,7 +66,7 @@ def get_chat_completion(prompt, history):
     return response
 
 def extract_company_name_and_job_name(job_description_text,api_key):
-    return get_llm_response(f"""Given the following job description, extract and return the company name and job title in the format CompanyName_JobName that is each there will be no spaces between the Words in the words in the
+    return get_llm_response(f"""Given the following job description, extract and return the company name and job title in the format CompanyName|JobName that is each there will be no spaces between the Words in the words in the
     CompanyName and the JobName, In the JobName each word will be the first Letter in upper case and the rest in lower case for example data scientist  will be written as DataScientist.
     if the company name is ABC and the job is data scientist the result should return ABC_DataScientist
 

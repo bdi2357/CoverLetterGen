@@ -180,6 +180,7 @@ Tailor the letter to the specific job requirements and showcase the candidate's 
 
             if grade >= 9:
                 print("Achieved satisfactory grade.")
+                company_name_and_job_name = company_name_and_job_name.replace("|","_")
                 grades_df.to_csv(os.path.join("Output","Grades",company_name_and_job_name + "_BasicIterativeAgent_grades.csv"), index=False)
 
                 break
@@ -300,7 +301,7 @@ Tailor the letter to the specific job requirements and showcase the candidate's 
             final_cv = self.cover_letter_gen.ai_model.get_response(enforcement_prompt, history=self.history,
                                                                    temperature=0.1)
 
-        grades_df.to_csv(os.path.join("Output", "Grades", company_name_and_job_name +"_BasicIterativeAgent__grades.csv"), index= False)
+        grades_df.to_csv(os.path.join("Output", "Grades", company_name_and_job_name.replace("|","_") +"_BasicIterativeAgent__grades.csv"), index= False)
         return final_cv, critique
 
 

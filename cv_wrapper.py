@@ -111,7 +111,7 @@ def cv_content_generation(cv_file_path, job_description_text, llm_provider='open
     # Use extract_information_from_cv to get structured data from CV text
     cv_data = extract_information_from_cv(cv_text,api_key)
 
-    cv_data = {key.strip('"'): value.strip('"') if isinstance(value, str) else value for key, value in cv_data.items()}
+    cv_data = {key.strip('"'): value.strip('"').replace(',', '').strip() if isinstance(value, str) else value for key, value in cv_data.items()}
 
     #personal_info = cv_data.get('Full name', '') + ", " + cv_data.get('Email', '')
     #job_history = cv_data.get('Professional Summary', 'No job history found')
@@ -217,15 +217,17 @@ Ensure the dictionary format is valid and follows this example structure:
 def wrapping_cv_generation(cv_file_path,job_description_text, output_dir,openai_api_key, template_path,agent_type='BasicIterativeAgent', agent_module='basic_iterative'):
     company_name_and_job_name = extract_company_name_and_job_name(job_description_text, openai_api_key)
     sections_file_path = os.path.join("Output", "Sections",
-                                      company_name_and_job_name.replace(".", "_") + agent_type +"_sections.txt")
+                                      company_name_and_job_name.replace(".", "_").replace("|","_") + agent_type +"_sections.txt")
     critique_file_path = os.path.join("Output", "CritiqueFinal",
-                                      company_name_and_job_name.replace(".", "_") + agent_type + "_crtitque.txt")
+                                      company_name_and_job_name.replace(".", "_").replace("|","_") + agent_type + "_crtitque.txt")
     cv_content_final_file_path = os.path.join("Output", "CV_content",
-                                              company_name_and_job_name.replace(".", "_") + agent_type +"_cv_content.txt")
-    dest_cv_path = os.path.join("Output", "CV","CV_"+company_name_and_job_name.replace(".", "_")+"_"+agent_type )
+                                              company_name_and_job_name.replace(".", "_").replace("|","_") + agent_type +"_cv_content.txt")
+    dest_cv_path = os.path.join("Output", "CV","CV_"+company_name_and_job_name.replace(".", "_").replace("|","_")+"_"+agent_type )
     finalized_cv_content, critique_final, cv_data = cv_content_generation(cv_file_path, job_description_text,
                                                                 llm_provider="openai",
                                                                 agent_type=agent_type, agent_module=agent_module)
+    company_name,job_name = company_name_and_job_name.split("|")
+    company_name_and_job_name = company_name_and_job_name.replace("|","_")
     client = OpenAI(api_key=openai_api_key)
 
     # Assume `openai` is the OpenAI client object initialized with your API key
@@ -234,7 +236,9 @@ def wrapping_cv_generation(cv_file_path,job_description_text, output_dir,openai_
     save_cv_sections_to_file(sections, sections_file_path)
     # generate_cv_document(file_name, finalized_cv_content)
     sections_critique = parse_cv_critique_to_dict(critique_final , "cv_critique" + company_name_and_job_name, cv_data["Full name"])
-
+    sections_critique["job_name"] = job_name
+    sections_critique["company_name"] = company_name
+    sections_critique['name'] = sections_critique['name'].replace("\"","")
     print(f"Generated CV saved to {sections}")
     with open(critique_file_path, "w", encoding="utf-8") as f:
         f.write(f"{critique_final}:\n")
