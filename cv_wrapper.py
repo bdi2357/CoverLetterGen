@@ -226,6 +226,7 @@ def wrapping_cv_generation(cv_file_path,job_description_text, output_dir,openai_
     finalized_cv_content, critique_final, cv_data = cv_content_generation(cv_file_path, job_description_text,
                                                                 llm_provider="openai",
                                                                 agent_type=agent_type, agent_module=agent_module)
+    print(company_name_and_job_name)
     company_name,job_name = company_name_and_job_name.split("|")
     company_name_and_job_name = company_name_and_job_name.replace("|","_")
     client = OpenAI(api_key=openai_api_key)
@@ -246,6 +247,10 @@ def wrapping_cv_generation(cv_file_path,job_description_text, output_dir,openai_
         f.write(f"{finalized_cv_content}:\n")
     print(sections_critique)
     sections_critique["FinalGrade"] = [float(section["Grade"]) for section in sections_critique['sections'] if section['Title'].find('Overall Impression')>-1][0]
+    for section in sections_critique['sections']:
+        section['Content'] = section['Content'].replace("Ph.D","PhD").split(".")
+        if len(section["Content"][-1]) < 3:
+            section["Content"] = section["Content"][:-1]
     template_cv_critique_path = os.path.join("Templates", "Critique_CV_Template_v2.docx")
     print(load_cv_sections_from_file(sections_file_path))
     sections2cv(template_path, sections_file_path, dest_cv_path)
@@ -253,7 +258,7 @@ def wrapping_cv_generation(cv_file_path,job_description_text, output_dir,openai_
     final_verdict_prompt = create_final_verdict_prompt_v2(sections_critique)
     final_verdict = get_response(client, final_verdict_prompt)
     sections_critique["final_verdict"] = final_verdict
-    output_criqique_path = os.path.join("Output", "CV", "CVCritiqueTest2")
+    output_criqique_path = os.path.join("Output", "CV", "CVCritique_" + company_name_and_job_name)
     #sections_critique["FinalGrade "] = sections_critique.pop()
     generate_cv(output_criqique_path, sections_critique, template_cv_critique_path)
     print(sections_critique)
@@ -266,7 +271,7 @@ if __name__ == "__main__":
     #cv_file_path = os.path.join("Data", 'CV_GPT_rev.pdf')
     cv_file_path = os.path.join("Data","CV", 'CV_GPT_N5.pdf')
 
-    job_description_text_file_path = os.path.join("Data","JobDescriptions","Acculine.txt")
+    job_description_text_file_path = os.path.join("Data","JobDescriptions","Solidus.txt")
 
     load_dotenv('.env', override=True)
     openai_api_key = os.getenv('OPENAI_API_KEY')
