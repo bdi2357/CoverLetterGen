@@ -81,7 +81,7 @@ class OpenAIModel(LLMModel):
     Class to interact with the OpenAI API using a client instance.
     """
 
-    def __init__(self, api_key, model_name='gpt-3.5-turbo'):
+    def __init__(self, api_key, model_name='gpt-4o-mini'):
         """
         Initialize the OpenAI model with the given API key and model name.
 
@@ -121,7 +121,8 @@ class OpenAIModel(LLMModel):
 
         # Add current user prompt
         messages.append({"role": "user", "content": prompt})
-
+        print("@$"*4)
+        print("messages are:", messages)
         try:
             completion = self.client.chat.completions.create(
                 model=self.model_name,

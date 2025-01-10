@@ -235,6 +235,7 @@ Tailor the letter to the specific job requirements and showcase the candidate's 
             - Ensure dynamic and targeted improvements in each iteration.
             - Strictly adhere to factual correctness. Do not invent achievements or experiences that are not present in the original CV.
             - Continuously enhance the CV until all critique points are adequately addressed and grades improve.
+            
 
             ### Iteration Goal:
             At the end of each iteration, the improved CV should demonstrate noticeable progress in alignment with the job description and critique feedback.
@@ -246,8 +247,8 @@ Tailor the letter to the specific job requirements and showcase the candidate's 
             self._add_to_history("user", improvement_prompt)
 
             # Generate the next version of the CV
-            cv_content = self.cover_letter_gen.ai_model.get_response(improvement_prompt, history=self.history , temperature=1.2)
-
+            #cv_content = self.cover_letter_gen.ai_model.get_response(improvement_prompt, history=self.history , temperature=0.99)
+            cv_content = self.cover_letter_gen.ai_model.get_response(improvement_prompt, history=None,temperature=0.99)
             # Store the improved CV in the assistant's response history
             self._add_to_history("assistant", cv_content)
 
