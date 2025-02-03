@@ -144,6 +144,7 @@ Tailor the letter to the specific job requirements and showcase the candidate's 
         total_reward = 0
         previous_grade = 0
         company_name_and_job_name = extract_company_name_and_job_name(job_description_text,self.cover_letter_gen.ai_model.api_key)
+        company_name_and_job_name = company_name_and_job_name.replace("/","_").replace("|","_")
         # Combine initial CV sections
         cv_content = self.cover_letter_gen.generate_cv(original_cv, job_description_text, original_cv, history=None)
         grades_names = ["Relevance to the Job", "Clarity and Structure","Skills Presentation",
@@ -181,6 +182,10 @@ Tailor the letter to the specific job requirements and showcase the candidate's 
             if grade >= 9:
                 print("Achieved satisfactory grade.")
                 company_name_and_job_name = company_name_and_job_name.replace("|","_")
+                print("$"*77)
+                print(company_name_and_job_name)
+                print(os.path.join("Output","Grades",company_name_and_job_name + "_BasicIterativeAgent_grades.csv"))
+
                 grades_df.to_csv(os.path.join("Output","Grades",company_name_and_job_name + "_BasicIterativeAgent_grades.csv"), index=False)
 
                 break
@@ -302,6 +307,9 @@ Tailor the letter to the specific job requirements and showcase the candidate's 
             final_cv = self.cover_letter_gen.ai_model.get_response(enforcement_prompt, history=self.history,
                                                                    temperature=0.1)
 
+        print("^"*77)
+        print(company_name_and_job_name)
+        print(os.path.join("Output", "Grades", company_name_and_job_name.replace("|","_") +"_BasicIterativeAgent__grades.csv"))
         grades_df.to_csv(os.path.join("Output", "Grades", company_name_and_job_name.replace("|","_") +"_BasicIterativeAgent__grades.csv"), index= False)
         return final_cv, critique
 

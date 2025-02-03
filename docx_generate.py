@@ -43,6 +43,7 @@ def save_cv_sections_to_file(sections, file_path):
         file_path (str): The path of the file to save the structured output.
     """
     print("In save_cv_sections_to_file")
+    file_path = file_path.replace("/","_").replace("|","_")
     with open(file_path, "w", encoding="utf-8") as f:
         for section, content in sections.items():
             f.write(f"{section}:\n")

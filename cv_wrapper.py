@@ -216,6 +216,7 @@ Ensure the dictionary format is valid and follows this example structure:
     return prompt
 def wrapping_cv_generation(cv_file_path,job_description_text, output_dir,openai_api_key, template_path,agent_type='BasicIterativeAgent', agent_module='basic_iterative'):
     company_name_and_job_name = extract_company_name_and_job_name(job_description_text, openai_api_key)
+    company_name_and_job_name = company_name_and_job_name.replace("/","_")
     sections_file_path = os.path.join("Output", "Sections",
                                       company_name_and_job_name.replace(".", "_").replace("|","_") + agent_type +"_sections.txt")
     critique_file_path = os.path.join("Output", "CritiqueFinal",
@@ -269,9 +270,9 @@ def wrapping_cv_generation(cv_file_path,job_description_text, output_dir,openai_
 if __name__ == "__main__":
     start = time.time()
     #cv_file_path = os.path.join("Data", 'CV_GPT_rev.pdf')
-    cv_file_path = os.path.join("Data","CV", 'CV_GPT_N5.pdf')
+    cv_file_path = os.path.join("Data","CV", 'CV_GPT_N6.pdf')
 
-    job_description_text_file_path = os.path.join("Data","JobDescriptions","Solidus.txt")
+    job_description_text_file_path = os.path.join("Data","JobDescriptions","Cellebrite.txt")
 
     load_dotenv('.env', override=True)
     openai_api_key = os.getenv('OPENAI_API_KEY')
