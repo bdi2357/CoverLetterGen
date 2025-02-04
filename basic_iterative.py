@@ -192,36 +192,54 @@ Tailor the letter to the specific job requirements and showcase the candidate's 
 
             # Use the critique to guide CV improvements
             improvement_prompt = f"""
-            You are tasked with improving the candidate's CV iteratively. Your goal is to align the CV with the job description, ensure factual correctness, and enhance readability and impact. In each iteration, you must address the critique points and ensure measurable improvements in the following categories:
+            You are tasked with improving the candidate's CV iteratively. Your goal is to align the CV with the job description, ensure factual correctness, and enhance readability and impact. In each iteration, you must address the critique points and ensure measurable improvements in the following categories, while ensuring that all claims are substantiated with real, verifiable results.
 
             ### Key Improvement Areas:
+
             1. **Relevance to the Job**:
                - Ensure alignment with the job description by incorporating role-specific skills, tools, and technologies where factually applicable.
-               - Use critique feedback such as "{critique.split('**1. Relevance to the Job**')[1].split('**')[0].strip() if '**1. Relevance to the Job**' in critique else 'No feedback provided'}".
-               - Emphasize directly relevant experience and projects that demonstrate the candidate's ability to meet job requirements.
+               - **Example 1**:  
+                 CV Text: "Increased portfolio returns by 10% by developing advanced algorithmic trading strategies."  
+                 Critique: "Provide more specifics on the strategies and how they were developed (e.g., models, algorithms, or techniques used)."  
+                 **Improvement**: "Developed and deployed an end-to-end portfolio optimization software based on customer constraints and customizable cost functions, which improved asset allocation and increased portfolio returns by 10%. The software was tested in live market conditions, leading to a measurable increase in investment performance."
 
             2. **Clarity and Structure**:
                - Follow a clear and logical structure with consistent formatting.
-               - Address specific feedback such as "{critique.split('**2. Clarity and Structure**')[1].split('**')[0].strip() if '**2. Clarity and Structure**' in critique else 'No feedback provided'}".
-               - Simplify complex descriptions and ensure concise bullet points for quick readability.
+               - **Example 1**:  
+                 CV Text: "Developed innovative portfolio management tools, reducing analysis time by 30%."  
+                 Critique: "Specify what kind of tools were developed and how they improved the workflow or decision-making."  
+                 **Improvement**: "Developed portfolio management tools that integrated machine learning algorithms to predict market movements, reducing analysis time by 30%. The tools allowed portfolio managers to make faster, more accurate decisions on asset allocation."
 
             3. **Skills Presentation**:
                - Highlight technical and soft skills relevant to the role.
-               - Incorporate suggestions like "{critique.split('**3. Skills Presentation**')[1].split('**')[0].strip() if '**3. Skills Presentation**' in critique else 'No feedback provided'}".
-               - Link specific skills to concrete achievements or projects to demonstrate their practical application.
+               - **Example 1**:  
+                 CV Text: "Technical Skills: Python, R, C++, TensorFlow, PyTorch."  
+                 Critique: "Link the technical skills with concrete examples from past projects to demonstrate how they were applied."  
+                 **Improvement**: "Technical Skills: Python (Developed algorithmic trading strategies using TensorFlow), R (Analyzed financial time-series data), C++ (Optimized high-frequency trading systems for real-time execution), TensorFlow (Built predictive models for market trends), PyTorch (Created neural network models for asset price prediction)."
 
             4. **Professionalism**:
                - Maintain a professional tone and error-free presentation.
-               - Address any issues with grammar, tone, or formatting based on feedback such as "{critique.split('**4. Professionalism**')[1].split('**')[0].strip() if '**4. Professionalism**' in critique else 'No feedback provided'}".
+               - **Example 1**:  
+                 CV Text: "Developed trading strategies for multiple asset classes."  
+                 Critique: "Clarify the types of assets and the impact of the strategies."  
+                 **Improvement**: "Developed algorithmic trading strategies for equities, forex, and commodities using advanced optimization techniques, resulting in improved profitability across all asset classes. These strategies were integrated into a multi-asset trading platform and tested against historical data."
 
-            5. **Keyword Optimization for ATS**:
-               - Optimize for applicant tracking systems by naturally incorporating keywords from the job description.
-               - Avoid keyword stuffing; ensure that each mention is tied to a specific skill or experience to maintain credibility.
+            5. **Quantifiable Achievements (with Evidence)**:
+               - Incorporate quantifiable achievements to demonstrate the impact of your work, but ensure that they are based on solid, verifiable results. Focus on **specific projects**, **methodologies**, and **delivered solutions** that align with job requirements.
+               - **Example 1**:  
+                 CV Text: "Achieved a 25% improvement in asset allocation efficiency."  
+                 Critique: "Be more specific about the methods used to achieve this result and provide evidence for the improvement."  
+                 **Improvement**: "Developed and delivered end-to-end portfolio optimization software, incorporating customer constraints and customizable cost functions. The software enabled real-time asset allocation adjustments, improving efficiency by 25% in portfolio management. This improvement was verified through backtesting and implemented in client-facing solutions."
+
+               - **Example 2**:  
+                 CV Text: "Led cross-functional teams for various financial projects."  
+                 Critique: "Provide more details on the projects and their results."  
+                 **Improvement**: "Led cross-functional teams in the development of a real-time trading algorithm, optimizing execution speed by 30% and improving trade accuracy by 20%. The system was deployed in live trading environments and showed measurable improvements in execution efficiency."
 
             ### Improvement Actions:
-            - **Specific Examples**: For any critique pointing out missing or underdeveloped content, provide detailed examples or elaborations. For instance, if observability tools are mentioned, ensure projects involving telemetry or performance monitoring are highlighted.
-            - **Quantifiable Achievements**: Include measurable outcomes (e.g., reduced downtime by X%) where applicable. If such metrics are not explicitly mentioned, consider emphasizing qualitative impacts.
-            - **Iteration-Specific Changes**: Each iteration must introduce new improvements based on the critique. Refrain from repeating similar changes without adding new value.
+            - **Specific Examples**: For any critique pointing out missing or underdeveloped content, provide detailed examples or elaborations. For instance, when mentioning portfolio optimization, specify the techniques used (e.g., genetic algorithms, Markowitz portfolio theory) and how they were delivered (e.g., as client-facing software or within an internal tool).
+            - **Quantifiable Achievements with Solid Evidence**: Include measurable outcomes (e.g., increased efficiency, improved returns, reduced time-to-market) where applicable, but only if these metrics can be substantiated with real-world deliverables (e.g., project outcomes, backtesting results, client feedback).
+            - **Iteration-Specific Changes**: Each iteration must introduce new improvements based on the critique. Avoid repeating similar changes without adding new value.
 
             ### Context:
             - **Job Description**:  
@@ -240,10 +258,9 @@ Tailor the letter to the specific job requirements and showcase the candidate's 
             - Ensure dynamic and targeted improvements in each iteration.
             - Strictly adhere to factual correctness. Do not invent achievements or experiences that are not present in the original CV.
             - Continuously enhance the CV until all critique points are adequately addressed and grades improve.
-            
 
             ### Iteration Goal:
-            At the end of each iteration, the improved CV should demonstrate noticeable progress in alignment with the job description and critique feedback.
+            At the end of each iteration, the improved CV should demonstrate noticeable progress in alignment with the job description and critique feedback, supported by **real, verifiable project results and achievements**.
             """
 
             print("improvement_prompt")
