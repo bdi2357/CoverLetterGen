@@ -17,6 +17,47 @@ from ExtractCompanyNameJob import extract_company_name_and_job_name
 from doc_from_template import sections2cv
 from parse_critique_to_dict import parse_cv_critique_to_dict
 from doc_from_template import generate_cv
+
+def critique_original_cv(cv_content, job_description_text, cover_letter_gen_a, critique_file_path, api_key ):
+    critique, grade, grades_dict = cover_letter_gen_a.create_critique(
+                cv_content, cv_content, job_description_text, history=""
+            )
+    cv_data = extract_information_from_cv(cv_content, api_key)
+
+    cv_data = {key.strip('"'): value.strip('"').replace(',', '').strip() if isinstance(value, str) else value for
+               key, value in cv_data.items()}
+    company_name_and_job_name = extract_company_name_and_job_name(job_description_text, openai_api_key)
+    company_name_and_job_name = company_name_and_job_name.replace("/", "_")
+    company_name, job_name = company_name_and_job_name.split("|")
+    company_name_and_job_name = company_name_and_job_name.replace("|", "_")
+
+    # generate_cv_document(file_name, finalized_cv_content)
+    sections_critique = parse_cv_critique_to_dict(critique, "cv_critique" + company_name_and_job_name,
+                                                  cv_data["Full name"])
+    sections_critique["job_name"] = job_name
+    sections_critique["company_name"] = company_name
+    sections_critique['name'] = sections_critique['name'].replace("\"", "")
+
+
+    print(sections_critique)
+    sections_critique["FinalGrade"] = [float(section["Grade"]) for section in sections_critique['sections'] if
+                                       section['Title'].find('Overall Impression') > -1][0]
+    for section in sections_critique['sections']:
+        section['Content'] = section['Content'].replace("Ph.D", "PhD").split(".")
+        if len(section["Content"][-1]) < 3:
+            section["Content"] = section["Content"][:-1]
+    template_cv_critique_path = os.path.join("Templates", "Critique_CV_Template_v2.docx")
+
+
+    final_verdict_prompt = create_final_verdict_prompt_v2(sections_critique)
+    client = OpenAI(api_key=openai_api_key)
+    final_verdict = get_response(client, final_verdict_prompt)
+    sections_critique["final_verdict"] = final_verdict
+    #output_criqique_path = os.path.join("Output", "CV", "CVCritique_" + company_name_and_job_name)
+    # sections_critique["FinalGrade "] = sections_critique.pop()
+    generate_cv(critique_file_path, sections_critique, template_cv_critique_path)
+
+    return
 """
 def cv_content_generation(cv_file_path, job_description_text, llm_provider='openai'):
     # Load API key securely
@@ -223,7 +264,21 @@ def wrapping_cv_generation(cv_file_path,job_description_text, output_dir,openai_
                                       company_name_and_job_name.replace(".", "_").replace("|","_") + agent_type + "_crtitque.txt")
     cv_content_final_file_path = os.path.join("Output", "CV_content",
                                               company_name_and_job_name.replace(".", "_").replace("|","_") + agent_type +"_cv_content.txt")
-    dest_cv_path = os.path.join("Output", "CV","CV_"+company_name_and_job_name.replace(".", "_").replace("|","_")+"_"+agent_type )
+    #extract_information_from_cv
+    cv_text = load_and_extract_text(cv_file_path)
+    cv_data2 = extract_information_from_cv(cv_text, openai_api_key)
+    ai_model = OpenAIModel(api_key=openai_api_key, model_name='gpt-4o')
+
+
+    # Initialize the CVGenerator with the chosen AI model
+    cv_gen = CVGenerator(ai_model)
+    critique_original_cv_file_path = os.path.join("Output", "CV", "OriginalCVCritique_" + company_name_and_job_name.replace("|","_"))
+    critique_original_cv(cv_text, job_description_text, cv_gen, critique_original_cv_file_path, openai_api_key)
+
+    cv_data2 = {key.strip('"'): value.strip('"').replace(',', '').strip() if isinstance(value, str) else value for
+               key, value in cv_data2.items()}
+    #cv_data['Full name']
+    dest_cv_path = os.path.join("Output", "CV","CV_"+company_name_and_job_name.replace(".", "_").replace("|","_")+"_"+agent_type +cv_data2['Full name'].replace(" ","_").replace("-","_").replace("\"",""))
     finalized_cv_content, critique_final, cv_data = cv_content_generation(cv_file_path, job_description_text,
                                                                 llm_provider="openai",
                                                                 agent_type=agent_type, agent_module=agent_module)
@@ -237,6 +292,7 @@ def wrapping_cv_generation(cv_file_path,job_description_text, output_dir,openai_
     sections = parser.parse_cv_sections(finalized_cv_content)
     save_cv_sections_to_file(sections, sections_file_path)
     # generate_cv_document(file_name, finalized_cv_content)
+
     sections_critique = parse_cv_critique_to_dict(critique_final , "cv_critique" + company_name_and_job_name, cv_data["Full name"])
     sections_critique["job_name"] = job_name
     sections_critique["company_name"] = company_name
@@ -270,14 +326,16 @@ def wrapping_cv_generation(cv_file_path,job_description_text, output_dir,openai_
 if __name__ == "__main__":
     start = time.time()
     #cv_file_path = os.path.join("Data", 'CV_GPT_rev.pdf')
-    cv_file_path = os.path.join("Data","CV", 'CV_GPT_N6.pdf')
-
-    job_description_text_file_path = os.path.join("Data","JobDescriptions","Cellebrite.txt")
-
+    #cv_file_path = os.path.join("Data","CV", 'CV_GPT_N6.pdf')
+    #cv_file_path = os.path.join("Data","CV","Neta Shoham - CV -2025.pdf")
+    cv_file_path = os.path.join("Data","CV","Neta_Shoham_CV_modified4.pdf")
+    #job_description_text_file_path = os.path.join("Data","JobDescriptions","Cellebrite.txt")
+    #job_description_text_file_path = os.path.join("Data", "JobDescriptions", "PropHouse.txt")
+    job_description_text_file_path = os.path.join("Data", "JobDescriptions", "Mobileye.txt")
     load_dotenv('.env', override=True)
     openai_api_key = os.getenv('OPENAI_API_KEY')
     output_dir = "Output"
-    template_path = os.path.join("Templates", "Final_Revised_Template_V2.docx")
+    template_path = os.path.join("Templates", "Final_Revised_Template_v2.docx")
     job_description_text = open(job_description_text_file_path,"r",encoding="utf-8").read()
     #print(job_description_text)
     #wrapping_cv_generation(cv_file_path, job_description_text, output_dir, openai_api_key,template_path, "ModularIterativeAgent", "modular_iterative")

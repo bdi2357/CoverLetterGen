@@ -79,6 +79,7 @@ class CVParserAI:
         Returns:
             dict: A dictionary with section names as keys and section content as values.
         """
+        print("In ")
         prompt = f"""
         Here is a CV document:
 
@@ -127,6 +128,8 @@ class CVParserAI:
         Returns:
             dict: A dictionary with section names as keys and content formatted to align with the CV template.
         """
+        print("In parse_cv_sections")
+        print(cv_content)
         prompt = f"""
         Here is a CV document:
 
@@ -146,6 +149,7 @@ class CVParserAI:
             "Experience": [
                 {{
                     "Title": "Job title",
+                    "WorkPlace": "Work Place",
                     "Duration": "Job duration",
                     "Responsibilities": ["Responsibility 1", "Responsibility 2", ...]
                 }}

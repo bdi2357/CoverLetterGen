@@ -13,6 +13,8 @@ def extract_cv_sections(cv_content):
     Returns:
         dict: A dictionary with section names as keys and section content as values.
     """
+    print("content in extract_cv_sections")
+    print(cv_content)
     section_patterns = {
         "Name": r"^\s*(.*?)\s*\n",
         "Contact": r"Contact:(.*?)\n\n",

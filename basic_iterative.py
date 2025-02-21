@@ -38,7 +38,7 @@ Job Description:
 CV:
 {cv_text}
 
-Tailor the letter to the specific job requirements and showcase the candidate's match for the position. Mention specific accomplishments and quantify results whenever possible. Keep the tone professional and precise. The letter should be no more than 4 sentences. Avoid unnecessary adjectives and emotive language."""
+Tailor the letter to the specific job requirements and showcase the candidate's match for the position. Mention specific accomplishments. Keep the tone professional and precise. The letter should be no more than 4 sentences. Avoid unnecessary adjectives and emotive language."""
         cover_letter = self.cover_letter_gen.generate_cover_letter(cv_text, job_description_text, history=self.history)
         self._add_to_history("user", cover_letter)
         self._add_to_history("assistant", cover_letter)
@@ -147,6 +147,8 @@ Tailor the letter to the specific job requirements and showcase the candidate's 
         company_name_and_job_name = company_name_and_job_name.replace("/","_").replace("|","_")
         # Combine initial CV sections
         cv_content = self.cover_letter_gen.generate_cv(original_cv, job_description_text, original_cv, history=None)
+        print("cover_letter_gen.generate_cv cv_content")
+        print(cv_content)
         grades_names = ["Relevance to the Job", "Clarity and Structure","Skills Presentation",
             "Professionalism","Overall"]
         grades_df = pd.DataFrame(columns=['iteration']+grades_names)
@@ -191,6 +193,8 @@ Tailor the letter to the specific job requirements and showcase the candidate's 
                 break
 
             # Use the critique to guide CV improvements
+            print("_input_cv_")
+            print(cv_content)
             improvement_prompt = f"""
             You are tasked with improving the candidate's CV iteratively. Your goal is to align the CV with the job description, ensure factual correctness, and enhance readability and impact. In each iteration, you must address the critique points and ensure measurable improvements in the following categories, while ensuring that all claims are substantiated with real, verifiable results.
 
@@ -224,21 +228,12 @@ Tailor the letter to the specific job requirements and showcase the candidate's 
                  Critique: "Clarify the types of assets and the impact of the strategies."  
                  **Improvement**: "Developed algorithmic trading strategies for equities, forex, and commodities using advanced optimization techniques, resulting in improved profitability across all asset classes. These strategies were integrated into a multi-asset trading platform and tested against historical data."
 
-            5. **Quantifiable Achievements (with Evidence)**:
-               - Incorporate quantifiable achievements to demonstrate the impact of your work, but ensure that they are based on solid, verifiable results. Focus on **specific projects**, **methodologies**, and **delivered solutions** that align with job requirements.
-               - **Example 1**:  
-                 CV Text: "Achieved a 25% improvement in asset allocation efficiency."  
-                 Critique: "Be more specific about the methods used to achieve this result and provide evidence for the improvement."  
-                 **Improvement**: "Developed and delivered end-to-end portfolio optimization software, incorporating customer constraints and customizable cost functions. The software enabled real-time asset allocation adjustments, improving efficiency by 25% in portfolio management. This improvement was verified through backtesting and implemented in client-facing solutions."
-
-               - **Example 2**:  
-                 CV Text: "Led cross-functional teams for various financial projects."  
-                 Critique: "Provide more details on the projects and their results."  
-                 **Improvement**: "Led cross-functional teams in the development of a real-time trading algorithm, optimizing execution speed by 30% and improving trade accuracy by 20%. The system was deployed in live trading environments and showed measurable improvements in execution efficiency."
-
+            5. **Preserve Company Names**  
+            - Ensure **each entry** in the **Experience section** includes the **company name** from the **original CV**.  
+            - If a company name is missing, use the **corresponding job title and date** to locate it in the **original CV**.  
+            
             ### Improvement Actions:
             - **Specific Examples**: For any critique pointing out missing or underdeveloped content, provide detailed examples or elaborations. For instance, when mentioning portfolio optimization, specify the techniques used (e.g., genetic algorithms, Markowitz portfolio theory) and how they were delivered (e.g., as client-facing software or within an internal tool).
-            - **Quantifiable Achievements with Solid Evidence**: Include measurable outcomes (e.g., increased efficiency, improved returns, reduced time-to-market) where applicable, but only if these metrics can be substantiated with real-world deliverables (e.g., project outcomes, backtesting results, client feedback).
             - **Iteration-Specific Changes**: Each iteration must introduce new improvements based on the critique. Avoid repeating similar changes without adding new value.
 
             ### Context:
@@ -255,12 +250,17 @@ Tailor the letter to the specific job requirements and showcase the candidate's 
             {critique}
 
             ### Focus:
+            - Ensure that all **company names** from the original CV are present.
             - Ensure dynamic and targeted improvements in each iteration.
             - Strictly adhere to factual correctness. Do not invent achievements or experiences that are not present in the original CV.
             - Continuously enhance the CV until all critique points are adequately addressed and grades improve.
 
             ### Iteration Goal:
             At the end of each iteration, the improved CV should demonstrate noticeable progress in alignment with the job description and critique feedback, supported by **real, verifiable project results and achievements**.
+            The result have to be reliable any qunatitative  asseration should have reference in the **Original CV Version**
+            
+            
+
             """
 
             print("improvement_prompt")
@@ -292,7 +292,7 @@ Tailor the letter to the specific job requirements and showcase the candidate's 
 
             Work Experience
             {% for job in Experience %}
-            · {{job.Title}} | ({{job.Duration}})
+            · {{job.Title}} | {{job.WorkPlace}} | ({{job.Duration}})
             {% for resp in job.Responsibilities %}
             Ø  {{resp}}
             {% endfor %}{% endfor %}
@@ -328,6 +328,8 @@ Tailor the letter to the specific job requirements and showcase the candidate's 
         print(company_name_and_job_name)
         print(os.path.join("Output", "Grades", company_name_and_job_name.replace("|","_") +"_BasicIterativeAgent__grades.csv"))
         grades_df.to_csv(os.path.join("Output", "Grades", company_name_and_job_name.replace("|","_") +"_BasicIterativeAgent__grades.csv"), index= False)
+        print("final_cv")
+        print(final_cv)
         return final_cv, critique
 
 

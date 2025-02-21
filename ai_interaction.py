@@ -329,6 +329,9 @@ class CVGenerator:
 
         5. **Professional Tone**  
            - Maintain a concise and professional tone throughout. Ensure there are no grammatical errors or formatting inconsistencies.
+        6. **Preserve Company Names**  
+            - Ensure **each entry** in the **Experience section** includes the **company name** from the **original CV**.  
+            - If a company name is missing, use the **corresponding job title and date** to locate it in the **original CV**.  
 
         Update the current CV version based on these guidelines while preserving essential information from the original CV.
 
@@ -362,53 +365,67 @@ class CVGenerator:
         print(cv_content)
         prompt = f"""Provide a detailed critique of the following CV based on these criteria:
 
-        1. **Relevance to the Job**  
-           - Does the CV emphasize skills and experiences directly aligned with the job description?  
-           - Grade: **#Relevance to the Job Grade: NUMBER##**  
-           - Explain how well the CV aligns with the job requirements.
+       1. **Relevance to the Job** 
+          - Does the CV emphasize skills and experiences directly aligned with the job description? 
+          - Consider how the candidate's **transferable skills** and **relevant experiences** can help bridge gaps where specific skills may not be present.
+          - Grade: **#Relevance to the Job Grade: NUMBER##** 
+          - Explain how well the CV aligns with the job requirements, especially when rare skills are involved. For example, if the job requires forensic research or reverse engineering, acknowledge the candidate's **ability to quickly learn** or **adapt** their current skills to meet these needs.
 
-        2. **Clarity and Structure**  
-           - Is the CV easy to read, well-organized, and logically structured?  
-           - Grade: **#Clarity and Structure Grade: NUMBER##**  
-           - Assess whether the layout enhances readability.
+       2. **Clarity and Structure** 
+          - Is the CV easy to read, well-organized, and logically structured? 
+          - Grade: **#Clarity and Structure Grade: NUMBER##** 
+          - Assess whether the layout enhances readability.
 
-        3. **Skills Presentation**  
-           - Are the candidate's technical and soft skills adequately highlighted and relevant?  
-           - Grade: **#Skills Presentation Grade: NUMBER##**  
-           - Highlight strengths and areas for improvement in skills representation.
+       3. **Skills Presentation** 
+          - Are the candidate's technical and soft skills adequately highlighted and relevant? 
+          - Grade: **#Skills Presentation Grade: NUMBER##** 
+          - Highlight strengths and areas for improvement in skills representation. Focus on how well these skills are linked to real-world achievements.
 
-        4. **Professionalism**  
-           - Is the CV professional in tone, free of errors, and written in clear language?  
-           - Grade: **#Professionalism Grade: NUMBER##**  
-           - Note any tone, grammar, or formatting issues.
+       4. **Professionalism** 
+          - Is the CV professional in tone, free of errors, and written in clear language? 
+          - Grade: **#Professionalism Grade: NUMBER##** 
+          - Note any tone, grammar, or formatting issues.
+          
+        5. **Reliability & Factual Accuracy**
+           - Does the improved CV maintain **factual consistency** with the original CV?
+           - Are all new achievements **verifiable**, or are there claims that seem exaggerated or unsubstantiated?
+           - Ensure that all **quantitative achievements** (e.g., "improved efficiency by 30%") are based on information **already present** in the original CV or are **clearly justifiable**.
+           - Ensure that all **company names** from the original CV are present.
+           - Grade: **#Reliability Grade: NUMBER##** 
+           - Explain if any parts of the improved CV introduce **unclear or unverifiable claims** and how to correct them.
 
-        5. **Overall Impression**  
-           - How well does the CV present the candidate as a strong fit for the role?  
-           - Grade: **#Overall Grade: NUMBER.#**  
-           - Summarize key strengths and critical weaknesses.
 
-        **Instructions**:  
-        - Ensure each grade follows the specified format **#Criterion Name Grade: NUMBER##** for criteria grades, and **#Overall Grade: NUMBER.#** for the overall impression.  
-        - Provide actionable feedback, even if sections are sparse or incomplete.  
+       6. **Overall Impression** 
+          - How well does the CV present the candidate as a strong fit for the role? 
+          - Grade: **#Overall Grade: NUMBER.#** 
+          - Summarize key strengths and critical weaknesses.
 
-        **Inputs**:
+       **Instructions**: 
+       - Ensure each grade follows the specified format **#Criterion Name Grade: NUMBER##** for criteria grades, and **#Overall Grade: NUMBER.#** for the overall impression. 
+       - Provide actionable feedback, especially when there are gaps in certain areas (e.g., forensic research) that the candidate can potentially fill with **transferable skills**.
+       - Be mindful of **rare skills** (such as forensic research) not always being present in candidates’ CVs, and instead focus on **how the candidate’s expertise** in other areas could contribute to the role.
 
-        **Current CV Version**:  
-        {cv_content}  
+       **Inputs**:
 
-        **Job Description**:  
-        {job_description_text}  
+       **Current CV Version**: 
+       {cv_content} 
+       
+       **Original CV Version**:
+        {original_cv}
 
-        Ensure consistency and provide all grades using the required format. Keeping grades using the required format is very important."""
+       **Job Description**: 
+       {job_description_text} 
 
-        response = self.ai_model.get_response(prompt, history=history,temperature= 0.01)
+       Ensure consistency and provide all grades using the required format. Keeping grades using the required format is very important."""
+
+        response = self.ai_model.get_response(prompt, history=history, temperature=0.01)
 
         if response is None:
             raise ValueError("Failed to get a response from the AI model.")
 
         # Adjusted regular expression to allow flexibility in spaces and format
         print(response)
-        print("?"*100)
+        print("?" * 100)
         grades = {
             "Relevance to the Job": r"#Relevance to the Job Grade\s*:\s*(\d+(\.\d+)?)#",
             "Clarity and Structure": r"#Clarity and Structure Grade\s*:\s*(\d+(\.\d+)?)#",
@@ -426,7 +443,7 @@ class CVGenerator:
                 flag = True
             else:
                 grades_res[name] = float(re.search(grades[name], response).group(1))
-                #raise ValueError(f"Failed to extract {name} grade.")
+                # raise ValueError(f"Failed to extract {name} grade.")
         if flag:
             response = self.ai_model.get_response(prompt, history=history, temperature=0.01)
 
@@ -437,20 +454,21 @@ class CVGenerator:
 
             for name, pattern in grades.items():
                 print(name)
+                print(response)
                 match = re.search(pattern, response)
-                print(float(re.search(grades[name], response).group(1) ))
-                grades_res[name] = float(re.search(grades[name], response).group(1) )
+                print(float(re.search(grades[name], response).group(1)))
+                grades_res[name] = float(re.search(grades[name], response).group(1))
                 if not match:
                     raise ValueError(f"Failed to extract {name} grade.")
 
-        grade = float(re.search(grades["Overall"], response).group(1) )
-        """
-        match = re.search(r"\*\*Overall Grade:\s*(\d+(\.\d+)?)\*\*", response)
+        grade = float(re.search(grades["Overall"], response).group(1))
+
+        match = re.search(r"#Overall Grade\s*[:\-]?\s*(\d+(\.\d+)?)\s*#", response)
         if match:
             grade = float(match.group(1))
         else:
             raise ValueError("Failed to extract overall grade from the critique.")
-        """
         print("grades_res",grades_res)
         return response, grade,grades_res
-
+ 
+ 
