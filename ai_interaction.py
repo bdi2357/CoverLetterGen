@@ -170,7 +170,7 @@ Job Description:
 CV:
 {cv_text}
 
-Tailor the letter to the specific job requirements and showcase the candidate's match for the position. Mention specific accomplishments and quantify results whenever possible. Keep the tone professional and precise. The letter should be no more than 4 sentences. Avoid unnecessary adjectives and emotive language. Finalize with 'Best regards,' followed by the applicant's name from the CV."""
+Tailor the letter to the specific job requirements and showcase the candidate's match for the position. Mention specific accomplishments whenever possible. Keep the tone professional and precise. The letter should be no more than 4 sentences. Avoid unnecessary adjectives and emotive language. Finalize with 'Best regards,' followed by the applicant's name from the CV."""
         return self.ai_model.get_response(prompt, history=history)
 
     def create_critique(self, cover_letter, cv_text, job_description_text, history=None):

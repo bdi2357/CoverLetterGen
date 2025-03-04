@@ -326,12 +326,13 @@ def wrapping_cv_generation(cv_file_path,job_description_text, output_dir,openai_
 if __name__ == "__main__":
     start = time.time()
     #cv_file_path = os.path.join("Data", 'CV_GPT_rev.pdf')
-    #cv_file_path = os.path.join("Data","CV", 'CV_GPT_N6.pdf')
+    cv_file_path = os.path.join("Data","CV", 'CV_GPT_N6.pdf')
     #cv_file_path = os.path.join("Data","CV","Neta Shoham - CV -2025.pdf")
-    cv_file_path = os.path.join("Data","CV","Neta_Shoham_CV_modified4.pdf")
+    #cv_file_path = os.path.join("Data","CV","CV_2025_neta_shoham.pdf")
     #job_description_text_file_path = os.path.join("Data","JobDescriptions","Cellebrite.txt")
     #job_description_text_file_path = os.path.join("Data", "JobDescriptions", "PropHouse.txt")
-    job_description_text_file_path = os.path.join("Data", "JobDescriptions", "Mobileye.txt")
+    #job_description_text_file_path = os.path.join("Data", "JobDescriptions", "Mobileye.txt")
+    job_description_text_file_path = os.path.join("Data", "JobDescriptions", "Stampli.txt")
     load_dotenv('.env', override=True)
     openai_api_key = os.getenv('OPENAI_API_KEY')
     output_dir = "Output"
