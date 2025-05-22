@@ -97,6 +97,7 @@ def parse_extracted_info(response):
             key_value = line.split(":")
             if len(key_value) == 2:
                 key, value = key_value[0].strip(), key_value[1].strip()
+                print(key)
                 print("value :",value , type(value))
                 if isinstance(value,str) and value[0] == "\"" and value[-1] == "\"" :
                     print("HERE VAL")

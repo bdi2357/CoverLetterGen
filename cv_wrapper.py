@@ -28,6 +28,7 @@ def critique_original_cv(cv_content, job_description_text, cover_letter_gen_a, c
                key, value in cv_data.items()}
     company_name_and_job_name = extract_company_name_and_job_name(job_description_text, openai_api_key)
     company_name_and_job_name = company_name_and_job_name.replace("/", "_")
+    print(company_name_and_job_name)
     company_name, job_name = company_name_and_job_name.split("|")
     company_name_and_job_name = company_name_and_job_name.replace("|", "_")
 
@@ -327,12 +328,14 @@ if __name__ == "__main__":
     start = time.time()
     #cv_file_path = os.path.join("Data", 'CV_GPT_rev.pdf')
     cv_file_path = os.path.join("Data","CV", 'CV_GPT_N6.pdf')
+    #NetaShoham_CV_V2
+    #cv_file_path = os.path.join("Data", "CV", 'NetaShoham_CV_V1.pdf')
     #cv_file_path = os.path.join("Data","CV","Neta Shoham - CV -2025.pdf")
     #cv_file_path = os.path.join("Data","CV","CV_2025_neta_shoham.pdf")
     #job_description_text_file_path = os.path.join("Data","JobDescriptions","Cellebrite.txt")
     #job_description_text_file_path = os.path.join("Data", "JobDescriptions", "PropHouse.txt")
-    #job_description_text_file_path = os.path.join("Data", "JobDescriptions", "Mobileye.txt")
-    job_description_text_file_path = os.path.join("Data", "JobDescriptions", "Stampli.txt")
+    #job_description_text_file_path = os.path.join("Data", "JobDescriptions", "MobilEnginieye.txt")
+    job_description_text_file_path = os.path.join("Data", "JobDescriptions", "Factify.txt")
     load_dotenv('.env', override=True)
     openai_api_key = os.getenv('OPENAI_API_KEY')
     output_dir = "Output"
