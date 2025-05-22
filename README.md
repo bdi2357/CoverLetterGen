@@ -1,12 +1,27 @@
-# CoverLetterGen
+# CoverLetterGen: AI-Powered Cover Letters & CVs for Business
+
+## 💼 Transform Document Workflows with AI
+
+**CoverLetterGen** automates the tedious and repetitive process of creating tailored cover letters and CVs, freeing up time for candidates and organizations alike. Built on state-of-the-art AI, it ensures every document is customized and professional, unlocking new productivity for HR teams, job boards, recruiters, and talent platforms.
 
 *Automated, AI-powered cover letter and CV generator for tailored job applications.*
 
 ---
 
-## 🚀 Overview
+## 🚀 Why CoverLetterGen? (For Teams & Partners)
 
-**CoverLetterGen** streamlines the job application process by generating professional cover letters and customized CVs tailored to specific job descriptions. Leveraging AI and flexible templates, it helps candidates and career coaches save time and increase application quality.
+* **Save Time:** Instantly generate custom cover letters and CVs—at scale—for job applicants, talent pools, or outbound recruiting.
+* **Increase Quality:** AI-generated content adapts to each role and company, improving application standards and candidate experience.
+* **Integrate Anywhere:** Use as a CLI, back-end batch process, or build on top for portals and workflow tools.
+* **Customizable:** Bring your own templates, brand language, or prompt tuning.
+
+**Typical Use Cases:**
+
+* Job boards or HR SaaS that want to offer document generation as a feature
+* Recruitment agencies seeking high-quality, automated outreach
+* Enterprises with large-scale hiring or internal mobility programs
+
+For partnership, integration, or demo, [contact the maintainer](#-contact).
 
 ---
 
@@ -131,6 +146,13 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 
 ---
 
-## 💡 Contact
+## 🤝 Partnership & Contact
 
-For questions or suggestions, open an issue or contact the maintainer via GitHub.
+Interested in using CoverLetterGen for your company, platform, or workflow? Want to discuss a partnership or a pilot integration? Reach out via [GitHub issues](https://github.com/bdi2357/CoverLetterGen/issues) or email the maintainer directly: **[itaybd@gmail.com](mailto:itaybd@gmail.com)**
+
+---
+
+## 🙏 Credits & Acknowledgments
+
+* Built using [python-docx](https://github.com/python-openxml/python-docx), [OpenAI GPT](https://platform.openai.com/)
+* Inspired by the need to automate and personalize job applications
