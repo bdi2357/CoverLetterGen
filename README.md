@@ -11,17 +11,17 @@
 ## 🖼️ Example Workflow
 
 **1. Upload your CV and job description.**
-![CV Input](Data/Screenshots/Screenshot(205).png)
+![CV Input](Data/Screenshots/Screenshot (205).png)
 *Sample CV as seen in PDF viewer.*
 
 **2. Run CoverLetterGen (CLI or GUI).**
 
 **3. Instantly receive a tailored critique and improved CV.**
-![Critique Output](Data/Screenshots/Screenshot(206).png)
+![Critique Output](Data/Screenshots/Screenshot (206).png)
 *Automated CV critique with grades, strengths, and areas for improvement.*
 
 **4. See measurable improvement after applying feedback.**
-![Improved Critique Output](Data/Screenshots/Screenshot(209).png)
+![Improved Critique Output](Data/Screenshots/Screenshot (209).png)
 *The system helps improve your CV’s rating (from 8.5 to 9.0 in this example).*
 
 ## 🚀 Why CoverLetterGen? (For Teams & Partners)
