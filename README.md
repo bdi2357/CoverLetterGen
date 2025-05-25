@@ -10,20 +10,14 @@
 
 ## 🖼️ Example Workflow
 
-**1. Upload your CV and job description.**
+1. Upload your original CV.Original CV as seen in PDF viewer.
 ![CV Input](Data/Screenshots/Screenshot(205).png)
-*Sample CV as seen in PDF viewer.*
-
-**2. Run CoverLetterGen (CLI or GUI).**
-
-**3. Instantly receive a tailored critique and improved CV.**
-![Critique Output](Data/Screenshots/Screenshot(206).png)
-*Automated CV critique with grades, strengths, and areas for improvement.*
-
-**4. See measurable improvement after applying feedback.**
-![Improved Critique Output](Data/Screenshots/Screenshot(209).png)
-*The system helps improve your CV’s rating (from 8.5 to 9.0 in this example).*
-
+2. Instantly receive an automated critique of your current CV.Automated AI-powered critique with grades, strengths, and improvement areas (before edits).
+![CV Input](Data/Screenshots/Screenshot(209).png)
+3. Apply feedback and update your CV.Revised CV after applying actionable suggestions.
+![CV Input](Data/Screenshots/Screenshot(206).png)
+4. Instantly receive a new critique showing the improved result.System-generated review shows a higher CV rating (improved from 8.5 to 9.0 in this example).
+![CV Input](Data/Screenshots/Screenshot(208).png)
 ## 🚀 Why CoverLetterGen? (For Teams & Partners)
 
 * **Save Time:** Instantly generate custom cover letters and CVs—at scale—for job applicants, talent pools, or outbound recruiting.
