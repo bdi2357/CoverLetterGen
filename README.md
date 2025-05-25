@@ -16,7 +16,7 @@
 
 **2. Run CoverLetterGen (CLI or GUI).**
 
-**3. Instantly receive a tailored critique and improved CV.**
+**3. Instantly receive a  tailored critique and improved CV.**
 ![Critique Output](Data/Screenshots/Screenshot(206).png)
 *Automated CV critique with grades, strengths, and areas for improvement.*
 
