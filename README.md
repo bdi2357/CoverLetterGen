@@ -31,7 +31,7 @@
 * Recruitment agencies seeking high-quality, automated outreach
 * Enterprises with large-scale hiring or internal mobility programs
 
-For partnership, integration, or demo, [contact the maintainer](#-contact).
+For partnership, integration, or demo, [contact the maintainer](mailto:itaybd@gmail.com).
 
 ---
 
